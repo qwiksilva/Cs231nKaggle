@@ -8,7 +8,6 @@ import os.path
 from model import get_model
 from utils import crps, real_to_cdf, preprocess, rotation_augmentation, shift_augmentation
 
-
 def load_train_data():
     """
     Load training data from .npy files.
@@ -36,13 +35,13 @@ def split_data(X, y, split_ratio=0.2):
     :param y: y
     :param split_ratio: split ratio for train and test data
     """
-split = X.shape[0] * split_ratio
-X_test = X[:split, :, :, :]
-y_test = y[:split, :]
-X_train = X[split:, :, :, :]
-y_train = y[split:, :]
+    split = X.shape[0] * split_ratio
+    X_test = X[:split, :, :, :]
+    y_test = y[:split, :]
+    X_train = X[split:, :, :, :]
+    y_train = y[split:, :]
 
-return X_train, y_train, X_test, y_test
+    return X_train, y_train, X_test, y_test
 
 
 def train():
