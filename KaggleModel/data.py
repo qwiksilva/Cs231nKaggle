@@ -111,6 +111,8 @@ def load_images(from_dir, verbose=True):
                     current_study = study_id
                     current_study_images = []
                 images.append(image)
+                print len(images)
+                print len(current_study_images)
                 if verbose:
                     if total % 1000 == 0:
                         print('Images processed {0}'.format(total))
