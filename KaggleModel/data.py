@@ -34,28 +34,11 @@ def crop_resize(images, circles):
         else:
             y = cen_x - crop_size[1]/2
             yy = y+crop_size[1]
-            
+
         crop_img = padded[:, x:xx, y:yy]
         crops.append(crop_img)
     
     return np.array(crops)
-
-# def crop_resize(img):
-#     """
-#     Crop center and resize.
-
-#     :param img: image to be cropped and resized.
-#     """
-#     if img.shape[0] < img.shape[1]:
-#         img = img.T
-#     # we crop image from center
-#     short_edge = min(img.shape[:2])
-#     yy = int((img.shape[0] - short_edge) / 2)
-#     xx = int((img.shape[1] - short_edge) / 2)
-#     crop_img = img[yy: yy + short_edge, xx: xx + short_edge]
-#     img = crop_img
-#     img = imresize(img, img_shape)
-#     return img
 
 
 def load_images(from_dir, verbose=True):
@@ -95,7 +78,7 @@ def load_images(from_dir, verbose=True):
 
                 image = dicom.read_file(image_path)
                 image = image.pixel_array.astype(float)
-                image /= np.max(image)  # scale to [0,1]
+                # image /= np.max(image)  # scale to [0,1]
 
                 if pixel_scale == None:
                     pixel_scale = image.PixelSpacing
@@ -158,7 +141,7 @@ def load_images(from_dir, verbose=True):
     rois, circles = calc_rois(all_study_images)
     study_to_images[last_study] = crop_resize(all_study_images, circles)
 
-    return ids, study_to_images
+    return ids, study_to_images, pixel_scale
 
 
 def map_studies_results():
@@ -166,7 +149,7 @@ def map_studies_results():
     Maps studies to their respective targets.
     """
     id_to_results = dict()
-    train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
+    train_csv = open('/data/KaggleData/train.csv') # /data/KaggleData/train.csv
     lines = train_csv.readlines()
     i = 0
     for item in lines:
@@ -187,7 +170,7 @@ def write_train_npy():
     print('Writing training data to .npy file...')
     print('-'*50)
 
-    study_ids, images = load_images('D:/Documents/CS231N/dataset/train')  # /data/KaggleData/train # load images and their ids
+    study_ids, images, pixel_scale = load_images('/data/KaggleData/train')  # /data/KaggleData/train # load images and their ids
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
@@ -198,14 +181,19 @@ def write_train_npy():
         all_study_images = np.concatentate(study)
         X.append(all_study_images)
         y.append(outputs)
-        # for i in range(study.shape[0]):
-        #     X.append(study[i, :, :, :])
-        #     y.append(outputs)
 
+    # X_new = []
+    # maxDepth = max([stack.shape[0] for stack in X])
+    # for stack in X:
+    #     # Concatenate blank images until all stacks are equal size
+    #     stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
+    #     X_new.append(stack)
+    # X = np.array(X_new, dtype=np.uint8)
+    
     X = np.array(X, dtype=np.uint8)
     y = np.array(y)
-    np.save('E:data/X_train.npy', X)
-    np.save('E:data/y_train.npy', y)
+    np.save('/data/X_train.npy', X)
+    np.save('/data/y_train.npy', y)
     print('Done.')
 
 
@@ -217,7 +205,7 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    ids, images = load_images('D:/Documents/CS231N/dataset/validate') # /data/KaggleData/validate
+    ids, images, pixel_scale = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
 
@@ -225,13 +213,18 @@ def write_validation_npy():
         study = images[study_id]
         all_study_images = np.concatentate(study)
         X.append(all_study_images)
-        # for i in range(study.shape[0]):
-        #     study_ids.append(study_id)
-        #     X.append(study[i, :, :, :])
+
+    # X_new = []
+    # maxDepth = max([stack.shape[0] for stack in X])
+    # for stack in X:
+    #     # Concatenate blank images until all stacks are equal size
+    #     stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
+    #     X_new.append(stack)
+    # X = np.array(X_new, dtype=np.uint8)
 
     X = np.array(X, dtype=np.uint8)
-    np.save('E:data/X_validate.npy', X)
-    np.save('E:data/ids_validate.npy', study_ids)
+    np.save('/data/X_validate.npy', X)
+    np.save('/data/ids_validate.npy', study_ids)
     print('Done.')
 
 
