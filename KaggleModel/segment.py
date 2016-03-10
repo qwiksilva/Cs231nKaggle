@@ -512,7 +512,7 @@ def get_ROIs(originals, h1s, regression_params):
     (xslope, xintercept, yslope, yintercept) = regression_params
     (num_slices, _, _) = h1s.shape
     results = []
-    circles = []
+    centers = []
     for i in range(num_slices):
         log("Getting ROI in slice %d..." % i, 3)
         o = originals[i]

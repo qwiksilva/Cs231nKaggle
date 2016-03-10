@@ -6,8 +6,7 @@ import dicom
 from scipy.misc import imresize
 from segment import calc_rois
 
-img_resize = True
-img_shape = (64, 64)
+crop_size = (128, 128)
 
 def crop_resize(images, circles):
     """
@@ -17,24 +16,33 @@ def crop_resize(images, circles):
     """
     crops = []
     for i in xrange(images.shape[0]):
-        center = circles[i][1]
+        center = circles[i]
         stack = images[i]
+	print('center', center)
+	print(stack.shape)
         # we crop image from center
         cen_x = np.round(center[0])
         cen_y = np.round(center[1])
         if cen_x - crop_size[0]/2 < 0:
             x = 0
             xx = crop_size[1]
+        elif cen_x + crop_size[0]/2 > stack.shape[1]:
+            xx = stack.shape[1]
+            x = xx - crop_size[0]
         else:
             x = cen_x - crop_size[0]/2
             xx = x+crop_size[0]
+
         if cen_y - crop_size[1]/2 < 0:
             y = 0
             yy = crop_size[1]
+        elif cen_y + crop_size[1]/2 > stack.shape[2]:
+            yy = stack.shape[2]
+            y = yy - crop_size[1]
         else:
-            y = cen_x - crop_size[1]/2
+            y = cen_y - crop_size[1]/2
             yy = y+crop_size[1]
-
+	print(x,xx,y,yy)
         crop_img = stack[:, x:xx, y:yy]
         crops.append(crop_img)
     
