@@ -62,8 +62,8 @@ def load_images(from_dir, verbose=True):
     images = []  # saves 30-frame-images
     from_dir = from_dir if from_dir.endswith('/') else from_dir + '/'
 
-    spacings = []
     last_study = None
+    spacings = []
     for subdir, _, files in os.walk(from_dir):
         subdir = subdir.replace('\\', '/')  # windows path fix
         subdir_split = subdir.split('/')
@@ -119,11 +119,12 @@ def load_images(from_dir, verbose=True):
                         print('Images processed {0}'.format(total))
                 total += 1
 
-            all_study_images = study_to_images[last_study]
-            print(all_study_images.shape)
-            rois, circles = calc_rois(all_study_images)
-            print(len(circles))
-            study_to_images[last_study] = crop_resize(all_study_images, circles)
+	    if last_study != "":
+            	all_study_images = study_to_images[last_study]
+            	print(all_study_images.shape)
+            	rois, circles = calc_rois(all_study_images)
+            	print(len(circles))
+            	study_to_images[last_study] = crop_resize(all_study_images, circles)
 
     x = 0
     try:
