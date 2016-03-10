@@ -77,7 +77,7 @@ def load_images(from_dir, verbose=True):
                     continue
 
                 image = dicom.read_file(image_path)
-                
+
                 if pixel_scale == None:
                     pixel_scale = image.PixelSpacing
                     spacings.append(pixel_scale)
@@ -117,7 +117,9 @@ def load_images(from_dir, verbose=True):
                 total += 1
 
             all_study_images = study_to_images[last_study]
+            print(all_study_images.shape)
             rois, circles = calc_rois(all_study_images)
+            print(len(circles))
             study_to_images[last_study] = crop_resize(all_study_images, circles)
 
     x = 0
