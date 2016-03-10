@@ -105,6 +105,7 @@ def load_images(from_dir, verbose=True):
 
                 if current_study != study_id:
                     study_to_images[current_study] = np.array(current_study_images)
+		    print('shape', study_to_images[current_study].shape)
                     if current_study != "":
                         ids.append(current_study)
                     last_study = current_study
