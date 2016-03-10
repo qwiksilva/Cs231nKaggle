@@ -70,7 +70,6 @@ def load_images(from_dir, verbose=True):
     images = []  # saves 30-frame-images
     from_dir = from_dir if from_dir.endswith('/') else from_dir + '/'
 
-    last_study = None
     spacings = []
     for subdir, _, files in os.walk(from_dir):
         subdir = subdir.replace('\\', '/')  # windows path fix
@@ -109,14 +108,17 @@ def load_images(from_dir, verbose=True):
                         pass
                     current_study_sub = subdir
                     current_study_images.append(images)
-		    print(len(current_study_images))
+		            print(len(current_study_images))
                     images = []
 
                 if current_study != study_id:
-                    study_to_images[current_study] = np.array(current_study_images)
+                    all_study_images = np.array(current_study_images)
+                    centers = calc_rois(all_study_images)
+                    study_to_images[current_study] = crop_resize(all_study_images, centers)
+                    
                     if current_study != "":
                         ids.append(current_study)
-                    last_study = current_study
+
                     current_study = study_id
                     current_study_images = []
 
@@ -127,13 +129,7 @@ def load_images(from_dir, verbose=True):
                         print('Images processed {0}'.format(total))
                 total += 1
 
-    print(current_study, study_id) 
-    if last_study != "" and last_study != None:
-        all_study_images = study_to_images[last_study]
-	print(all_study_images.shape)
-        centers = calc_rois(all_study_images)
-        study_to_images[last_study] = crop_resize(all_study_images, centers)
-	print('last study shape', study_to_images[last_study].shape)
+
 
     x = 0
     try:
@@ -154,14 +150,10 @@ def load_images(from_dir, verbose=True):
     if current_study != "":
         ids.append(current_study)
 
-    if last_study != "":
-        all_study_images = study_to_images[last_study]
+        all_study_images = np.array(current_study_images)
         centers = calc_rois(all_study_images)
-        study_to_images[last_study] = crop_resize(all_study_images, centers)
-	print('last study shape', study_to_images[last_study].shape)
+        study_to_images[current_study] = crop_resize(all_study_images, centers)
 
-    for study_id in ids:
-	print('study shapes again...', study_to_images[study_id].shape)
     return ids, study_to_images, pixel_scale
 
 
