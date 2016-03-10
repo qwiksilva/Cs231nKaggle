@@ -19,8 +19,6 @@ def crop_resize(images, circles):
     for i in xrange(images.shape[0]):
         center = circles[i]
         stack = images[i]
-	print('center', center)
-	print(stack.shape)
         # we crop image from center
         cen_x = np.round(center[0])
         cen_y = np.round(center[1])
@@ -43,8 +41,9 @@ def crop_resize(images, circles):
         else:
             y = cen_y - crop_size[1]/2
             yy = y+crop_size[1]
-	print(x,xx,y,yy)
+
         crop_img = stack[:, x:xx, y:yy]
+	print('crop shape', crop_img.shape)
         crops.append(crop_img)
     
     return np.array(crops)
@@ -110,6 +109,7 @@ def load_images(from_dir, verbose=True):
                         pass
                     current_study_sub = subdir
                     current_study_images.append(images)
+		    print(len(current_study_images))
                     images = []
 
                 if current_study != study_id:
@@ -127,10 +127,13 @@ def load_images(from_dir, verbose=True):
                         print('Images processed {0}'.format(total))
                 total += 1
 
-	    if last_study != "":
-        	all_study_images = study_to_images[last_study]
-        	centers = calc_rois(all_study_images)
-        	study_to_images[last_study] = crop_resize(all_study_images, centers)
+    print(current_study, study_id) 
+    if last_study != "" and last_study != None:
+        all_study_images = study_to_images[last_study]
+	print(all_study_images.shape)
+        centers = calc_rois(all_study_images)
+        study_to_images[last_study] = crop_resize(all_study_images, centers)
+	print('last study shape', study_to_images[last_study].shape)
 
     x = 0
     try:
@@ -155,7 +158,10 @@ def load_images(from_dir, verbose=True):
         all_study_images = study_to_images[last_study]
         centers = calc_rois(all_study_images)
         study_to_images[last_study] = crop_resize(all_study_images, centers)
+	print('last study shape', study_to_images[last_study].shape)
 
+    for study_id in ids:
+	print('study shapes again...', study_to_images[study_id].shape)
     return ids, study_to_images, pixel_scale
 
 
@@ -185,23 +191,25 @@ def write_train_npy():
     print('Writing training data to .npy file...')
     print('-'*50)
 
-    study_ids, images, pixel_scale = load_images('/data/KaggleData/train')  # /data/KaggleData/train # load images and their ids
+    study_ids, images, pixel_scale = load_images('/data/tmp')  # /data/KaggleData/train # load images and their ids
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
 
     for study_id in study_ids:
         study = images[study_id]
+	print('study shape', study.shape)
         outputs = studies_to_results[study_id]
-        all_study_images = np.concatentate(study)
+        all_study_images = np.concatenate(study)
         X.append(all_study_images)
         y.append(outputs)
 
     X_new = []
-    maxDepth = max([stack.shape[0] for stack in X])
+    maxDepth = np.max([stack.shape[0] for stack in X])
     for stack in X:
+	print('stack shape', stack.shape)
         # Concatenate blank images until all stacks are equal size
-        stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
+        stack = np.concatenate((stack, np.zeros((maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))))
         X_new.append(stack)
 
     X = np.array(X_new, dtype=np.uint8)
@@ -219,20 +227,20 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    ids, images, pixel_scale = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
+    ids, images, pixel_scale = load_images('/data/tmp/') # /data/KaggleData/validate
     study_ids = []
     X = []
 
     for study_id in ids:
         study = images[study_id]
-        all_study_images = np.concatentate(study)
+        all_study_images = np.concatenate(study)
         X.append(all_study_images)
 
     X_new = []
-    maxDepth = max([stack.shape[0] for stack in X])
+    maxDepth = np.max([stack.shape[0] for stack in X])
     for stack in X:
         # Concatenate blank images until all stacks are equal size
-        stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
+        stack = np.concatenate((stack, np.zeros((maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))))
         X_new.append(stack)
 
     X = np.array(X_new, dtype=np.uint8)
