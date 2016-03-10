@@ -108,16 +108,15 @@ def load_images(from_dir, verbose=True):
                         pass
                     current_study_sub = subdir
                     current_study_images.append(images)
-		            print(len(current_study_images))
+		    print(len(current_study_images))
                     images = []
 
                 if current_study != study_id:
-                    all_study_images = np.array(current_study_images)
-                    centers = calc_rois(all_study_images)
-                    study_to_images[current_study] = crop_resize(all_study_images, centers)
-                    
                     if current_study != "":
                         ids.append(current_study)
+			all_study_images = np.array(current_study_images)
+                        centers = calc_rois(all_study_images)
+                        study_to_images[current_study] = crop_resize(all_study_images, centers)
 
                     current_study = study_id
                     current_study_images = []
