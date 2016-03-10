@@ -35,7 +35,7 @@ def crop_resize(images, circles):
             y = cen_x - crop_size[1]/2
             yy = y+crop_size[1]
 
-        crop_img = padded[:, x:xx, y:yy]
+        crop_img = stack[:, x:xx, y:yy]
         crops.append(crop_img)
     
     return np.array(crops)
@@ -105,15 +105,14 @@ def load_images(from_dir, verbose=True):
 
                 if current_study != study_id:
                     study_to_images[current_study] = np.array(current_study_images)
-		    print('shape', study_to_images[current_study].shape)
                     if current_study != "":
                         ids.append(current_study)
                     last_study = current_study
                     current_study = study_id
                     current_study_images = []
+
                 images.append(image)
-                print(len(images))
-                print(len(current_study_images))
+
                 if verbose:
                     if total % 1000 == 0:
                         print('Images processed {0}'.format(total))
@@ -121,10 +120,8 @@ def load_images(from_dir, verbose=True):
 
 	    if last_study != "":
             	all_study_images = study_to_images[last_study]
-            	print(all_study_images.shape)
-            	rois, circles = calc_rois(all_study_images)
-            	print(len(circles))
-            	study_to_images[last_study] = crop_resize(all_study_images, circles)
+            	centers = calc_rois(all_study_images)
+            	study_to_images[last_study] = crop_resize(all_study_images, centers)
 
     x = 0
     try:

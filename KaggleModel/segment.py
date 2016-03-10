@@ -284,8 +284,8 @@ def calc_rois(images):
     log("Post-processing filtered images...", 2)
     proc_regress_h1s, coords = post_process_regression(regress_h1s)
     log("Determining ROIs...", 2)
-    rois, circles = get_ROIs(dc, proc_regress_h1s, coords)
-    return rois, circles
+    centers = get_ROIs(dc, proc_regress_h1s, coords)
+    return centers
 
 
 def calc_all_areas(images, rois, circles):
@@ -518,13 +518,13 @@ def get_ROIs(originals, h1s, regression_params):
         o = originals[i]
         h = h1s[i]
         ctr = (xintercept + xslope * i, yintercept + yslope * i)
-        r = circle_smart_radius(h, ctr)
-        tmp = np.zeros_like(o)
-        floats_draw_circle(tmp, ctr, r, 1, -1)
-        results.append(tmp * o)
-        circles.append((ctr, r))
+        # r = circle_smart_radius(h, ctr)
+        # tmp = np.zeros_like(o)
+        # floats_draw_circle(tmp, ctr, r, 1, -1)
+        # results.append(tmp * o)
+        centers.append(ctr)
 
-    return (np.array(results), np.array(circles))
+    return np.array(centers)
 
 
 def bresenham(x0, x1, y0, y1, fn):
