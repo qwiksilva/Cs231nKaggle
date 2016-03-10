@@ -43,7 +43,6 @@ def crop_resize(images, circles):
             yy = y+crop_size[1]
 
         crop_img = stack[:, x:xx, y:yy]
-	print('crop shape', crop_img.shape)
         crops.append(crop_img)
     
     return np.array(crops)
@@ -108,7 +107,6 @@ def load_images(from_dir, verbose=True):
                         pass
                     current_study_sub = subdir
                     current_study_images.append(images)
-		    print(len(current_study_images))
                     images = []
 
                 if current_study != study_id:
@@ -189,7 +187,6 @@ def write_train_npy():
 
     for study_id in study_ids:
         study = images[study_id]
-	print('study shape', study.shape)
         outputs = studies_to_results[study_id]
         all_study_images = np.concatenate(study)
         X.append(all_study_images)
@@ -198,7 +195,6 @@ def write_train_npy():
     X_new = []
     maxDepth = np.max([stack.shape[0] for stack in X])
     for stack in X:
-	print('stack shape', stack.shape)
         # Concatenate blank images until all stacks are equal size
         stack = np.concatenate((stack, np.zeros((maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))))
         X_new.append(stack)
