@@ -77,12 +77,14 @@ def load_images(from_dir, verbose=True):
                     continue
 
                 image = dicom.read_file(image_path)
-                image = image.pixel_array.astype(float)
-                # image /= np.max(image)  # scale to [0,1]
-
+                
                 if pixel_scale == None:
                     pixel_scale = image.PixelSpacing
                     spacings.append(pixel_scale)
+
+                image = image.pixel_array.astype(float)
+                # image /= np.max(image)  # scale to [0,1]
+
                 # if img_resize:
                 #     image = crop_resize(image)
 
