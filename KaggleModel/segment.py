@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 import dicom
 import json
@@ -271,8 +270,8 @@ def calc_rois(images):
         first_harmonic = ff[1, :, :]
         log("Inverse Fourier transforming on slice %d..." % i, 3)
         result = np.absolute(ifftn(first_harmonic))
-        log("Performing Gaussian blur on slice %d..." % i, 3)
-        result = cv2.GaussianBlur(result, (5, 5), 0)
+        # log("Performing Gaussian blur on slice %d..." % i, 3)
+        # result = cv2.GaussianBlur(result, (5, 5), 0)
         return result
 
     log("Performing Fourier transforms...", 2)
