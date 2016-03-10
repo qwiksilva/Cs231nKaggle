@@ -189,11 +189,11 @@ def write_train_npy():
     #     stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
     #     X_new.append(stack)
     # X = np.array(X_new, dtype=np.uint8)
-    
+
     X = np.array(X, dtype=np.uint8)
     y = np.array(y)
-    np.save('/data/X_train.npy', X)
-    np.save('/data/y_train.npy', y)
+    np.save('/data/tmp/X_train.npy', X)
+    np.save('/data/tmp/y_train.npy', y)
     print('Done.')
 
 
@@ -223,8 +223,8 @@ def write_validation_npy():
     # X = np.array(X_new, dtype=np.uint8)
 
     X = np.array(X, dtype=np.uint8)
-    np.save('/data/X_validate.npy', X)
-    np.save('/data/ids_validate.npy', study_ids)
+    np.save('/data/tmp/X_validate.npy', X)
+    np.save('/data/tmp/ids_validate.npy', study_ids)
     print('Done.')
 
 
