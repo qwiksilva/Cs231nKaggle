@@ -4,27 +4,58 @@ import os
 import numpy as np
 import dicom
 from scipy.misc import imresize
+from segment import calc_rois
 
 img_resize = True
 img_shape = (64, 64)
 
-
-def crop_resize(img):
+def crop_resize(images, circles):
     """
     Crop center and resize.
 
     :param img: image to be cropped and resized.
     """
-    if img.shape[0] < img.shape[1]:
-        img = img.T
-    # we crop image from center
-    short_edge = min(img.shape[:2])
-    yy = int((img.shape[0] - short_edge) / 2)
-    xx = int((img.shape[1] - short_edge) / 2)
-    crop_img = img[yy: yy + short_edge, xx: xx + short_edge]
-    img = crop_img
-    img = imresize(img, img_shape)
-    return img
+    crops = []
+    for i in xrange(images.shape[0]):
+        center = circles[i][1]
+        stack = images[i]
+        # we crop image from center
+        cen_x = np.round(center[0])
+        cen_y = np.round(center[1])
+        if cen_x - crop_size[0]/2 < 0:
+            x = 0
+            xx = crop_size[1]
+        else:
+            x = cen_x - crop_size[0]/2
+            xx = x+crop_size[0]
+        if cen_y - crop_size[1]/2 < 0:
+            y = 0
+            yy = crop_size[1]
+        else:
+            y = cen_x - crop_size[1]/2
+            yy = y+crop_size[1]
+            
+        crop_img = padded[:, x:xx, y:yy]
+        crops.append(crop_img)
+    
+    return np.array(crops)
+
+# def crop_resize(img):
+#     """
+#     Crop center and resize.
+
+#     :param img: image to be cropped and resized.
+#     """
+#     if img.shape[0] < img.shape[1]:
+#         img = img.T
+#     # we crop image from center
+#     short_edge = min(img.shape[:2])
+#     yy = int((img.shape[0] - short_edge) / 2)
+#     xx = int((img.shape[1] - short_edge) / 2)
+#     crop_img = img[yy: yy + short_edge, xx: xx + short_edge]
+#     img = crop_img
+#     img = imresize(img, img_shape)
+#     return img
 
 
 def load_images(from_dir, verbose=True):
@@ -47,10 +78,15 @@ def load_images(from_dir, verbose=True):
     total = 0
     images = []  # saves 30-frame-images
     from_dir = from_dir if from_dir.endswith('/') else from_dir + '/'
+
+    spacings = []
+    last_study = None
     for subdir, _, files in os.walk(from_dir):
         subdir = subdir.replace('\\', '/')  # windows path fix
         subdir_split = subdir.split('/')
         study_id = subdir_split[-3]
+
+        pixel_scale = None
         if "sax" in subdir:
             for f in files:
                 image_path = os.path.join(subdir, f)
@@ -60,8 +96,12 @@ def load_images(from_dir, verbose=True):
                 image = dicom.read_file(image_path)
                 image = image.pixel_array.astype(float)
                 image /= np.max(image)  # scale to [0,1]
-                if img_resize:
-                    image = crop_resize(image)
+
+                if pixel_scale == None:
+                    pixel_scale = image.PixelSpacing
+                    spacings.append(pixel_scale)
+                # if img_resize:
+                #     image = crop_resize(image)
 
                 if current_study_sub != subdir:
                     x = 0
@@ -82,6 +122,7 @@ def load_images(from_dir, verbose=True):
                     study_to_images[current_study] = np.array(current_study_images)
                     if current_study != "":
                         ids.append(current_study)
+                    last_study = current_study
                     current_study = study_id
                     current_study_images = []
                 images.append(image)
@@ -89,6 +130,11 @@ def load_images(from_dir, verbose=True):
                     if total % 1000 == 0:
                         print('Images processed {0}'.format(total))
                 total += 1
+
+            all_study_images = study_to_images[last_study]
+            rois, circles = calc_rois(all_study_images)
+            study_to_images[last_study] = crop_resize(all_study_images, circles)
+
     x = 0
     try:
         while len(images) < 30:
@@ -108,6 +154,10 @@ def load_images(from_dir, verbose=True):
     if current_study != "":
         ids.append(current_study)
 
+    all_study_images = study_to_images[last_study]
+    rois, circles = calc_rois(all_study_images)
+    study_to_images[last_study] = crop_resize(all_study_images, circles)
+
     return ids, study_to_images
 
 
@@ -116,7 +166,7 @@ def map_studies_results():
     Maps studies to their respective targets.
     """
     id_to_results = dict()
-    train_csv = open('D:/Documents/CS231N/dataset/train.csv')
+    train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
     lines = train_csv.readlines()
     i = 0
     for item in lines:
@@ -137,7 +187,7 @@ def write_train_npy():
     print('Writing training data to .npy file...')
     print('-'*50)
 
-    study_ids, images = load_images('D:/Documents/CS231N/dataset/train')  # load images and their ids
+    study_ids, images = load_images('D:/Documents/CS231N/dataset/train')  # /data/KaggleData/train # load images and their ids
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
@@ -145,9 +195,12 @@ def write_train_npy():
     for study_id in study_ids:
         study = images[study_id]
         outputs = studies_to_results[study_id]
-        for i in range(study.shape[0]):
-            X.append(study[i, :, :, :])
-            y.append(outputs)
+        all_study_images = np.concatentate(study)
+        X.append(all_study_images)
+        y.append(outputs)
+        # for i in range(study.shape[0]):
+        #     X.append(study[i, :, :, :])
+        #     y.append(outputs)
 
     X = np.array(X, dtype=np.uint8)
     y = np.array(y)
@@ -164,15 +217,17 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    ids, images = load_images('D:/Documents/CS231N/dataset/validate')
+    ids, images = load_images('D:/Documents/CS231N/dataset/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
 
     for study_id in ids:
         study = images[study_id]
-        for i in range(study.shape[0]):
-            study_ids.append(study_id)
-            X.append(study[i, :, :, :])
+        all_study_images = np.concatentate(study)
+        X.append(all_study_images)
+        # for i in range(study.shape[0]):
+        #     study_ids.append(study_id)
+        #     X.append(study[i, :, :, :])
 
     X = np.array(X, dtype=np.uint8)
     np.save('E:data/X_validate.npy', X)
