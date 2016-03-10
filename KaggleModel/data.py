@@ -7,6 +7,7 @@ from scipy.misc import imresize
 from segment import calc_rois
 
 crop_size = (128, 128)
+#crop_size = (96, 96)
 
 def crop_resize(images, circles):
     """
@@ -127,9 +128,9 @@ def load_images(from_dir, verbose=True):
                 total += 1
 
 	    if last_study != "":
-            	all_study_images = study_to_images[last_study]
-            	centers = calc_rois(all_study_images)
-            	study_to_images[last_study] = crop_resize(all_study_images, centers)
+        	all_study_images = study_to_images[last_study]
+        	centers = calc_rois(all_study_images)
+        	study_to_images[last_study] = crop_resize(all_study_images, centers)
 
     x = 0
     try:
@@ -150,9 +151,10 @@ def load_images(from_dir, verbose=True):
     if current_study != "":
         ids.append(current_study)
 
-    all_study_images = study_to_images[last_study]
-    rois, circles = calc_rois(all_study_images)
-    study_to_images[last_study] = crop_resize(all_study_images, circles)
+    if last_study != "":
+        all_study_images = study_to_images[last_study]
+        centers = calc_rois(all_study_images)
+        study_to_images[last_study] = crop_resize(all_study_images, centers)
 
     return ids, study_to_images, pixel_scale
 
@@ -195,15 +197,14 @@ def write_train_npy():
         X.append(all_study_images)
         y.append(outputs)
 
-    # X_new = []
-    # maxDepth = max([stack.shape[0] for stack in X])
-    # for stack in X:
-    #     # Concatenate blank images until all stacks are equal size
-    #     stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
-    #     X_new.append(stack)
-    # X = np.array(X_new, dtype=np.uint8)
+    X_new = []
+    maxDepth = max([stack.shape[0] for stack in X])
+    for stack in X:
+        # Concatenate blank images until all stacks are equal size
+        stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
+        X_new.append(stack)
 
-    X = np.array(X, dtype=np.uint8)
+    X = np.array(X_new, dtype=np.uint8)
     y = np.array(y)
     np.save('/data/tmp/X_train.npy', X)
     np.save('/data/tmp/y_train.npy', y)
@@ -227,15 +228,14 @@ def write_validation_npy():
         all_study_images = np.concatentate(study)
         X.append(all_study_images)
 
-    # X_new = []
-    # maxDepth = max([stack.shape[0] for stack in X])
-    # for stack in X:
-    #     # Concatenate blank images until all stacks are equal size
-    #     stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
-    #     X_new.append(stack)
-    # X = np.array(X_new, dtype=np.uint8)
+    X_new = []
+    maxDepth = max([stack.shape[0] for stack in X])
+    for stack in X:
+        # Concatenate blank images until all stacks are equal size
+        stack = np.concatentate(stack, np.zeros(maxDepth - stack.shape[0], stack.shape[1], stack.shape[2]))
+        X_new.append(stack)
 
-    X = np.array(X, dtype=np.uint8)
+    X = np.array(X_new, dtype=np.uint8)
     np.save('/data/tmp/X_validate.npy', X)
     np.save('/data/tmp/ids_validate.npy', study_ids)
     print('Done.')
