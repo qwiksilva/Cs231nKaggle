@@ -12,8 +12,8 @@ def load_train_data():
     """
     Load training data from .npy files.
     """
-    X = np.load('data/X_train.npy')
-    y = np.load('data/y_train.npy')
+    X = np.load('/data/tmp/X_train.npy')
+    y = np.load('/data/tmp/y_train.npy')
 
     X = X.astype(np.float32)
     X /= 255
@@ -68,10 +68,14 @@ def train():
     # split to training and test
     X_train, y_train, X_test, y_test = split_data(X, y, split_ratio=0.2)
 
+    # Zero-center the data
+    X_train = X_train - np.mean(X_train, axis=0)
+    X_test = X_test - np.mean(X_test, axis=0)
+
     nb_iter = 200
     epochs_per_iter = 1
     batch_size = 32
-    calc_crps = 1  # calculate CRPS every n-th iteration (set to 0 if CRPS estimation is not needed)
+    calc_crps = 5  # calculate CRPS every n-th iteration (set to 0 if CRPS estimation is not needed)
 
     # remember min val. losses (best iterations), used as sigmas for submission
     min_val_loss_systole = sys.float_info.max
@@ -131,12 +135,10 @@ def train():
             crps_test = crps(cdf_test, np.concatenate((cdf_val_pred_systole, cdf_val_pred_diastole)))
             print('CRPS(test) = {0}'.format(crps_test))
 
-        print('Saving weights...')
-        # save weights so they can be loaded later
-        model_systole.save_weights('weights_systole' + str(i+1) + '.hdf5' , overwrite=True)
-        model_diastole.save_weights('weights_diastole' + str(i+1) + '.hdf5', overwrite=True)
-
-        '''
+        # print('Saving weights...')
+        # # save weights so they can be loaded later
+        # model_systole.save_weights('weights_systole' + str(i+1) + '.hdf5' , overwrite=True)
+        # model_diastole.save_weights('weights_diastole' + str(i+1) + '.hdf5', overwrite=True)
 
         # for best (lowest) val losses, save weights
         if val_loss_systole < min_val_loss_systole:
@@ -147,7 +149,6 @@ def train():
             min_val_loss_diastole = val_loss_diastole
             model_diastole.save_weights('weights_diastole_best.hdf5', overwrite=True)
 
-        '''
 
         # save best (lowest) val losses in file (to be later used for generating submission)
         with open('val_loss.txt', mode='w+') as f:
