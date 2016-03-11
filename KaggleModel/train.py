@@ -12,8 +12,8 @@ def load_train_data():
     """
     Load training data from .npy files.
     """
-    X = np.load('/data/pre/X_train.npy')
-    y = np.load('/data/pre/y_train.npy')
+    X = np.load('/data/pre/data/X_train.npy')
+    y = np.load('/data/pre/data/y_train.npy')
 
     X = X.astype(np.float32)
     X /= 255
