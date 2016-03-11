@@ -6,6 +6,7 @@ from keras.layers.core import Activation, Dense, Flatten, Dropout
 from keras.optimizers import Adam
 from keras.regularizers import l2
 from keras import backend as K
+from keras.layers.normalization import BatchNormalization
 
 
 def center_normalize(x):
@@ -21,6 +22,7 @@ def get_model():
 
     model.add(Convolution2D(64, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
+    model.add(BatchNormalization(axis=1))
     model.add(Convolution2D(64, 3, 3, border_mode='valid'))
     model.add(Activation('relu'))
     model.add(ZeroPadding2D(padding=(1, 1)))
