@@ -21,7 +21,7 @@ def get_model():
 
     model.add(Convolution2D(128, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
-    model.add(BatchNormalization(axis=1))
+    model.add(BatchNormalization(mode=1))
 
     model.add(Convolution2D(128, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
