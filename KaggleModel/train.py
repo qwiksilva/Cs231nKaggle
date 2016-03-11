@@ -12,8 +12,8 @@ def load_train_data():
     """
     Load training data from .npy files.
     """
-    X = np.load('/data/tmp/X_train.npy')
-    y = np.load('/data/tmp/y_train.npy')
+    X = np.load('/data/pre/X_train.npy')
+    y = np.load('/data/pre/y_train.npy')
 
     X = X.astype(np.float32)
     X /= 255
@@ -64,6 +64,8 @@ def train():
 
     #print('Pre-processing images...')
     #X = preprocess(X)
+    #np.save('/data/pre/pre/X_train.npy', X)
+
 
     # split to training and test
     X_train, y_train, X_test, y_test = split_data(X, y, split_ratio=0.2)
