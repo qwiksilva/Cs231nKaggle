@@ -22,7 +22,7 @@ def get_model():
 
     model.add(Convolution2D(128, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
-    model.add(BatchNormalization(axis=1))
+    #model.add(BatchNormalization(axis=1))
 
     model.add(Convolution2D(128, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
@@ -34,7 +34,7 @@ def get_model():
 
     model.add(Convolution2D(96, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
-    model.add(BatchNormalization(axis=1))
+    #model.add(BatchNormalization(axis=1))
 
     model.add(Convolution2D(96, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
@@ -46,7 +46,7 @@ def get_model():
 
     model.add(Convolution2D(64, 2, 2, border_mode='same'))
     model.add(Activation('relu'))
-    model.add(BatchNormalization(axis=1))
+    #model.add(BatchNormalization(axis=1))
 
     model.add(Convolution2D(64, 2, 2, border_mode='same'))
     model.add(Activation('relu'))
