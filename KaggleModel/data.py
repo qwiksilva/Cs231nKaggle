@@ -78,6 +78,7 @@ def load_images(from_dir, verbose=True):
         pixel_scale = None
         if "sax" in subdir:
             for f in files:
+                print(current_study)
                 image_path = os.path.join(subdir, f)
                 if not image_path.endswith('.dcm'):
                     continue
