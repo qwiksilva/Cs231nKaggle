@@ -181,7 +181,7 @@ def write_train_npy():
     print('Writing training data to .npy file...')
     print('-'*50)
 
-    study_ids, images, pixel_scale = load_images('/data/tmp')  # /data/KaggleData/train # load images and their ids
+    study_ids, images, pixel_scale = load_images('/data/KaggleData/train')  # /data/KaggleData/train # load images and their ids
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
@@ -215,7 +215,7 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    ids, images, pixel_scale = load_images('/data/tmp/') # /data/KaggleData/validate
+    ids, images, pixel_scale = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
 
