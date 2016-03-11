@@ -18,10 +18,11 @@ def center_normalize(x):
 
 def get_model():
     model = Sequential()
+    model.add(Activation(activation=center_normalize, input_shape=(30, 64, 64)))
 
     model.add(Convolution2D(128, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
-    model.add(BatchNormalization(mode=1))
+    model.add(BatchNormalization(axis=1))
 
     model.add(Convolution2D(128, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
