@@ -1,16 +1,16 @@
 from __future__ import print_function
 
 import numpy as np
-import keras
-from keras.models import Sequential
+# from keras.models import Sequential
+from keras.models import Graph
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers.core import Activation, Dense, Flatten, Dropout
 from keras.optimizers import Adam
 from keras.regularizers import l2
 from keras import backend as K
 from keras.layers.normalization import BatchNormalization
-from keras import activations, initializations, regularizers, constraints
-from keras.regularizers import ActivityRegularizer
+# from keras import activations, initializations, regularizers, constraints
+# from keras.regularizers import ActivityRegularizer
 
 def center_normalize(x):
     """
@@ -22,8 +22,6 @@ def get_model():
     graph = Graph()
     graph.add_input(name='input1', input_shape=(30,64,64)) #_,128,128
     graph.add_input(name='input2', input_shape=(4265,2)) # 2,498
-
-
     graph.add_node(Activation(activation=center_normalize), name='center_normalize', input='input1')
     
     graph.add_node(Convolution2D(64, 3, 3, border_mode='same'), name='Convolution2D1_1', input='center_normalize')
