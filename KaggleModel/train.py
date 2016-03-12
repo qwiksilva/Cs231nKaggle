@@ -102,7 +102,7 @@ def train():
 
         print('Fitting systole model...')
         hist_systole = model_systole.fit({'input1':X_train_aug, 'input2':metadata_train, 'output':y_train[:, 0]}, shuffle=True, nb_epoch=epochs_per_iter,
-                                         batch_size=batch_size, validation_data=(X_test,'input2':metadata_test, y_test[:, 0]))
+                                         batch_size=batch_size, validation_data={X_test,'input2':metadata_test, y_test[:, 0]})
 
         print('Fitting diastole model...')
         hist_diastole = model_diastole.fit({'input1':X_train_aug, 'input2':metadata_train, 'output':y_train[:, 1]}, shuffle=True, nb_epoch=epochs_per_iter,
