@@ -1,6 +1,7 @@
 from __future__ import print_function
 
-import keras.layers
+import numpy as np
+import keras
 from keras.models import Sequential
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers.core import Activation, Dense, Flatten, Dropout
@@ -8,7 +9,8 @@ from keras.optimizers import Adam
 from keras.regularizers import l2
 from keras import backend as K
 from keras.layers.normalization import BatchNormalization
-
+from keras import activations, initializations, regularizers, constraints
+from keras.regularizers import ActivityRegularizer
 
 def center_normalize(x):
     """
@@ -16,7 +18,7 @@ def center_normalize(x):
     """
     return (x - K.mean(x)) / K.std(x)
 
-class Dense2(Layer):
+class Dense2(keras.layers.core.Layer):
     input_ndim = 2
 
     def __init__(self, extra_inputs, batch_size, size, output_dim, init='glorot_uniform', activation='linear', weights=None,
@@ -52,9 +54,8 @@ class Dense2(Layer):
 
     def build(self):
         input_dim = self.input_shape[1]
-        input_dim += self.extra_dims
 
-        self.W_extra = self.init((input_dim, self.extra_dim),
+        self.W_extra = self.init((self.extra_dim, self.output_dim),
                            name='{}_W_extra'.format(self.name))
         self.W = self.init((input_dim, self.output_dim),
                            name='{}_W'.format(self.name))
@@ -89,18 +90,25 @@ class Dense2(Layer):
         return (self.input_shape[0], self.output_dim)
 
     def get_output(self, train=False):
-        (batch_start, batch_end) = self.batches[counter]
+        (batch_start, batch_end) = self.batches[self.counter]
 
         X = self.get_input(train)
-        X_concat = np.concatenate(X, self.extra_inputs[batch_start:batch_end, :], axis=1)
-        W_concat = np.concatenate(self.W, self.W_extra, axis=0)
-
-        output = self.activation(K.dot(X_concat, W_concat) + self.b)
-
-        if counter = self.nb_batch:
-            cunter = 0
+        if X.shape[0] != self.extra_inputs.shape[0]:
+	    f = open('test1.txt', 'a')
+            print("not adding extra inputs")
+	    f.write('X shape ' + str(X.shape) +  ' extra shape ' + str(self.extra_inputs.shape)+'\n')
+            output = self.activation(K.dot(X, self.W) + self.b)
         else:
-            counter += 1
+	    f = open('test.txt', 'w+')
+	    f.write('X shape ', X.shape, ' extra shape ', self.extra_inputs.shape)
+            X_concat = np.concatenate((X, self.extra_inputs[batch_start:batch_end, :]), axis=1)
+            W_concat = np.concatenate((self.W, self.W_extra), axis=0)
+            output = self.activation(K.dot(X_concat, W_concat) + self.b)
+
+        if self.counter == self.nb_batch:
+            self.counter = 0
+        else:
+            self.counter += 1
 
         return output
 
@@ -122,49 +130,36 @@ def get_model():
     model = Sequential()
     model.add(Activation(activation=center_normalize, input_shape=(30, 64, 64)))
 
-    model.add(Convolution2D(128, 3, 3, border_mode='same'))
+    model.add(Convolution2D(64, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
-    #model.add(BatchNormalization(axis=1))
-
-    model.add(Convolution2D(128, 3, 3, border_mode='same'))
+    model.add(Convolution2D(64, 3, 3, border_mode='valid'))
     model.add(Activation('relu'))
-    #model.add(BatchNormalization(axis=1))
-
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+    model.add(ZeroPadding2D(padding=(1, 1)))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
     model.add(Dropout(0.25))
-
 
     model.add(Convolution2D(96, 3, 3, border_mode='same'))
     model.add(Activation('relu'))
-    #model.add(BatchNormalization(axis=1))
-
-    model.add(Convolution2D(96, 3, 3, border_mode='same'))
+    model.add(Convolution2D(96, 3, 3, border_mode='valid'))
     model.add(Activation('relu'))
-    #model.add(BatchNormalization(axis=1))
-
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+    model.add(ZeroPadding2D(padding=(1, 1)))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
     model.add(Dropout(0.25))
 
-
-    model.add(Convolution2D(64, 2, 2, border_mode='same'))
+    model.add(Convolution2D(128, 2, 2, border_mode='same'))
     model.add(Activation('relu'))
-    #model.add(BatchNormalization(axis=1))
-
-    model.add(Convolution2D(64, 2, 2, border_mode='same'))
+    model.add(Convolution2D(128, 2, 2, border_mode='same'))
     model.add(Activation('relu'))
-    #model.add(BatchNormalization(axis=1))
-
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
     model.add(Dropout(0.25))
-
 
     model.add(Flatten())
-    model.add(Dense(np.rand.random((5, 500), 32, 500, 1024, W_extra_regularizer=l2(1e-3), W_regularizer=l2(1e-3)))
-    # model.add(Dense(1024, W_regularizer=l2(1e-3)))
+    model.add(Dense2(np.random.rand(4265, 2), 32, 500, 1024, W_extra_regularizer=l2(1e-3), W_regularizer=l2(1e-3)))
+    #model.add(Dense(1024, W_regularizer=l2(1e-3)))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1))
 
     adam = Adam(lr=0.0001)
-    model.compile(optimizer=adam, loss='mse')
+    model.compile(optimizer=adam, loss="mse")
     return model
