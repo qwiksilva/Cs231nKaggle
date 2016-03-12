@@ -68,28 +68,31 @@ def load_images(from_dir, verbose=True):
     total = 0
     images = []  # saves 30-frame-images
     from_dir = from_dir if from_dir.endswith('/') else from_dir + '/'
-
     spacings = []
+    metadata = {}
+    slice_locations = []
     for subdir, _, files in os.walk(from_dir):
         subdir = subdir.replace('\\', '/')  # windows path fix
         subdir_split = subdir.split('/')
         study_id = subdir_split[-3]
 
         pixel_scale = None
+        slice_thickness = None
+        
         if "sax" in subdir:
             for f in files:
-                print(current_study)
+                #print(current_study)
                 image_path = os.path.join(subdir, f)
                 if not image_path.endswith('.dcm'):
                     continue
-
+                
                 image = dicom.read_file(image_path)
-
-                if pixel_scale == None:
-                    pixel_scale = image.PixelSpacing
-                    spacings.append(pixel_scale)
-
+                if not pixel_scale:
+                    pixel_scale = float(image.PixelSpacing[0])
+                if not slice_thickness:
+                    slice_thickness = float(image.SliceThickness)
                 image = image.pixel_array.astype(float)
+
                 # image /= np.max(image)  # scale to [0,1]
 
                 # if img_resize:
@@ -109,13 +112,13 @@ def load_images(from_dir, verbose=True):
                     current_study_sub = subdir
                     current_study_images.append(images)
                     images = []
-
                 if current_study != study_id:
                     if current_study != "":
                         ids.append(current_study)
-			all_study_images = np.array(current_study_images)
+                        all_study_images = np.array(current_study_images)
                         centers = calc_rois(all_study_images)
                         study_to_images[current_study] = crop_resize(all_study_images, centers)
+                        metadata[current_study] = np.array([pixel_scale, slice_thickness])
 
                     current_study = study_id
                     current_study_images = []
@@ -126,9 +129,6 @@ def load_images(from_dir, verbose=True):
                     if total % 1000 == 0:
                         print('Images processed {0}'.format(total))
                 total += 1
-
-
-
     x = 0
     try:
         while len(images) < 30:
@@ -138,6 +138,8 @@ def load_images(from_dir, verbose=True):
             images = images[0:30]
     except IndexError:
         pass
+    metadata[study_id] = np.array([pixel_scale, slice_thickness])
+
 
     print('-'*50)
     print('All DICOM in {0} images loaded.'.format(from_dir))
@@ -147,12 +149,11 @@ def load_images(from_dir, verbose=True):
     study_to_images[current_study] = np.array(current_study_images)
     if current_study != "":
         ids.append(current_study)
-
         all_study_images = np.array(current_study_images)
         centers = calc_rois(all_study_images)
         study_to_images[current_study] = crop_resize(all_study_images, centers)
+    return ids, study_to_images, metadata
 
-    return ids, study_to_images, pixel_scale
 
 
 def map_studies_results():
@@ -181,17 +182,20 @@ def write_train_npy():
     print('Writing training data to .npy file...')
     print('-'*50)
 
-    study_ids, images, pixel_scale = load_images('/data/KaggleData/train')  # /data/KaggleData/train # load images and their ids
+    study_ids, images, all_metadata = load_images('/data/KaggleData/train')
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
+    metadata = []
 
     for study_id in study_ids:
         study = images[study_id]
+        study_metadata = all_metadata[study_id]
         outputs = studies_to_results[study_id]
         all_study_images = np.concatenate(study)
         X.append(all_study_images)
         y.append(outputs)
+        metadata.append(study_metadata)
 
     X_new = []
     maxDepth = np.max([stack.shape[0] for stack in X])
@@ -204,6 +208,7 @@ def write_train_npy():
     y = np.array(y)
     np.save('/data/tmp/X_train.npy', X)
     np.save('/data/tmp/y_train.npy', y)
+    np.save('/data/tmp/metadata.npy', study_metadata)
     print('Done.')
 
 
@@ -215,14 +220,17 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    ids, images, pixel_scale = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
+    ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
+    metadata = []
 
     for study_id in ids:
         study = images[study_id]
+        study_metadata = all_metadata[study_id]
         all_study_images = np.concatenate(study)
         X.append(all_study_images)
+        metadata.append(study_metadata)
 
     X_new = []
     maxDepth = np.max([stack.shape[0] for stack in X])
