@@ -18,148 +18,43 @@ def center_normalize(x):
     """
     return (x - K.mean(x)) / K.std(x)
 
-class Dense2(keras.layers.core.Layer):
-    input_ndim = 2
-
-    def __init__(self, extra_inputs, batch_size, size, output_dim, init='glorot_uniform', activation='linear', weights=None,
-                 W_extra_regularizer=None, W_regularizer=None, b_regularizer=None, activity_regularizer=None,
-                 W_constraint=None, b_constraint=None, input_dim=None, **kwargs):
-        self.counter = 0
-
-        self.nb_batch = int(np.ceil(size / float(batch_size)))
-        self.batches = [(i * batch_size, min(size, (i + 1) * batch_size)) for i in range(0, self.nb_batch)]
-
-        self.extra_inputs = extra_inputs
-        self.extra_dim = self.extra_inputs.shape[1]
-
-        self.init = initializations.get(init)
-        self.activation = activations.get(activation)
-        self.output_dim = output_dim
-
-        self.W_extra_regularizer = regularizers.get(W_extra_regularizer)
-        self.W_regularizer = regularizers.get(W_regularizer)
-        self.b_regularizer = regularizers.get(b_regularizer)
-        self.activity_regularizer = regularizers.get(activity_regularizer)
-
-        self.W_constraint = constraints.get(W_constraint)
-        self.b_constraint = constraints.get(b_constraint)
-        self.constraints = [self.W_constraint, self.b_constraint]
-
-        self.initial_weights = weights
-
-        self.input_dim = input_dim
-        if self.input_dim:
-            kwargs['input_shape'] = (self.input_dim,)
-        super(Dense2, self).__init__(**kwargs)
-
-    def build(self):
-        input_dim = self.input_shape[1]
-
-        self.W_extra = self.init((self.extra_dim, self.output_dim),
-                           name='{}_W_extra'.format(self.name))
-        self.W = self.init((input_dim, self.output_dim),
-                           name='{}_W'.format(self.name))
-        self.b = K.zeros((self.output_dim,),
-                         name='{}_b'.format(self.name))
-
-        self.trainable_weights = [self.W, self.W_extra, self.b]
-
-        self.regularizers = []
-        if self.W_extra_regularizer:
-            self.W_extra_regularizer.set_param(self.W_extra)
-            self.regularizers.append(self.W_extra_regularizer)
-
-        if self.W_regularizer:
-            self.W_regularizer.set_param(self.W)
-            self.regularizers.append(self.W_regularizer)
-
-        if self.b_regularizer:
-            self.b_regularizer.set_param(self.b)
-            self.regularizers.append(self.b_regularizer)
-
-        if self.activity_regularizer:
-            self.activity_regularizer.set_layer(self)
-            self.regularizers.append(self.activity_regularizer)
-
-        if self.initial_weights is not None:
-            self.set_weights(self.initial_weights)
-            del self.initial_weights
-
-    @property
-    def output_shape(self):
-        return (self.input_shape[0], self.output_dim)
-
-    def get_output(self, train=False):
-        (batch_start, batch_end) = self.batches[self.counter]
-
-        X = self.get_input(train)
-        if X.shape[0] != self.extra_inputs.shape[0]:
-	    f = open('test1.txt', 'a')
-            print("not adding extra inputs")
-	    f.write('X shape ' + str(X.shape) +  ' extra shape ' + str(self.extra_inputs.shape)+'\n')
-            output = self.activation(K.dot(X, self.W) + self.b)
-        else:
-	    f = open('test.txt', 'w+')
-	    f.write('X shape ', X.shape, ' extra shape ', self.extra_inputs.shape)
-            X_concat = np.concatenate((X, self.extra_inputs[batch_start:batch_end, :]), axis=1)
-            W_concat = np.concatenate((self.W, self.W_extra), axis=0)
-            output = self.activation(K.dot(X_concat, W_concat) + self.b)
-
-        if self.counter == self.nb_batch:
-            self.counter = 0
-        else:
-            self.counter += 1
-
-        return output
-
-    def get_config(self):
-        config = {'name': self.__class__.__name__,
-                  'output_dim': self.output_dim,
-                  'init': self.init.__name__,
-                  'activation': self.activation.__name__,
-                  'W_regularizer': self.W_regularizer.get_config() if self.W_regularizer else None,
-                  'b_regularizer': self.b_regularizer.get_config() if self.b_regularizer else None,
-                  'activity_regularizer': self.activity_regularizer.get_config() if self.activity_regularizer else None,
-                  'W_constraint': self.W_constraint.get_config() if self.W_constraint else None,
-                  'b_constraint': self.b_constraint.get_config() if self.b_constraint else None,
-                  'input_dim': self.input_dim}
-        base_config = super(Dense, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
-
 def get_model():
-    model = Sequential()
-    model.add(Activation(activation=center_normalize, input_shape=(30, 64, 64)))
+    graph = Graph()
+    graph.add_input(name='input1', input_shape=(30,64,64)) #_,128,128
+    graph.add_input(name='input2', input_shape=(4265,2)) # 2,498
 
-    model.add(Convolution2D(64, 3, 3, border_mode='same'))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-    model.add(Activation('relu'))
-    model.add(ZeroPadding2D(padding=(1, 1)))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-    model.add(Dropout(0.25))
 
-    model.add(Convolution2D(96, 3, 3, border_mode='same'))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(96, 3, 3, border_mode='valid'))
-    model.add(Activation('relu'))
-    model.add(ZeroPadding2D(padding=(1, 1)))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-    model.add(Dropout(0.25))
+    graph.add_node(Activation(activation=center_normalize), name='center_normalize', input='input1')
+    
+    graph.add_node(Convolution2D(64, 3, 3, border_mode='same'), name='Convolution2D1_1', input='center_normalize')
+    graph.add_node(Activation('relu'), name='relu1_1', input='Convolution2D1_1')
+    graph.add_node(Convolution2D(64, 3, 3, border_mode='valid'), name='Convolution2D1_2', input='relu1_1')
+    graph.add_node(Activation('relu'), name='relu1_2', input='Convolution2D1_2')
+    graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad1', input='relu1_2')
+    graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool1', input='zeropad1')
+    graph.add_node(Dropout(0.25), name='dropout1', input='maxpool1')
 
-    model.add(Convolution2D(128, 2, 2, border_mode='same'))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(128, 2, 2, border_mode='same'))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-    model.add(Dropout(0.25))
+    graph.add_node(Convolution2D(64, 3, 3, border_mode='same'), name='Convolution2D2_1', input='dropout1')
+    graph.add_node(Activation('relu'), name='relu2_1', input='Convolution2D2_1')
+    graph.add_node(Convolution2D(64, 3, 3, border_mode='valid'), name='Convolution2D2_2', input='relu2_1')
+    graph.add_node(Activation('relu'), name='relu2_2', input='Convolution2D2_2')
+    graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad2', input='relu2_2')
+    graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool2', input='zeropad2')
+    graph.add_node(Dropout(0.25), name='dropout2', input='maxpool2')
 
-    model.add(Flatten())
-    model.add(Dense2(np.random.rand(4265, 2), 32, 500, 1024, W_extra_regularizer=l2(1e-3), W_regularizer=l2(1e-3)))
-    #model.add(Dense(1024, W_regularizer=l2(1e-3)))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(1))
+    graph.add_node(Convolution2D(64, 3, 3, border_mode='same'), name='Convolution2D3_1', input='dropout2')
+    graph.add_node(Activation('relu'), name='relu3_1', input='Convolution2D3_1')
+    graph.add_node(Convolution2D(64, 3, 3, border_mode='valid'), name='Convolution2D3_2', input='relu3_1')
+    graph.add_node(Activation('relu'), name='relu3_2', input='Convolution2D3_2')
+    graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad3', input='relu3_2')
+    graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool3', input='zeropad3')
+    graph.add_node(Dropout(0.25), name='dropout3', input='maxpool3')
+
+    graph.add_node(Flatten(), name='flatten', input='dropout3')
+    graph.add_node(Dense(1024, W_regularizer=l2(1e-3)), name='dense1', inputs=['flatten', 'input2'], merge_mode='concat', concat_axis=1)
+    graph.add_node(Activation('relu'), name='relu4', input='dense1')
+    graph.add_node(Dense(1), name='output', input='relu4', create_output=True)
 
     adam = Adam(lr=0.0001)
-    model.compile(optimizer=adam, loss="mse")
-    return model
+    graph.compile(optimizer=adam, loss={'output':'mse'})
+    return graph

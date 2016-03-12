@@ -6,6 +6,11 @@ from skimage.restoration import denoise_tv_chambolle
 from scipy import ndimage
 from keras.utils.generic_utils import Progbar
 
+def root_mean_squared_error(y_true, y_pred):
+    """
+    RMSE loss function
+    """
+    return K.sqrt(K.mean(K.square(y_pred - y_true), axis=-1))
 
 def crps(true, pred):
     """
