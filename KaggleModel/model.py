@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import numpy as np
 import keras.layers
 from keras.models import Sequential
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
@@ -8,7 +9,8 @@ from keras.optimizers import Adam
 from keras.regularizers import l2
 from keras import backend as K
 from keras.layers.normalization import BatchNormalization
-
+from keras import activations, initializations, regularizers, constraints
+from keras.regularizers import ActivityRegularizer
 
 def center_normalize(x):
     """
@@ -16,7 +18,7 @@ def center_normalize(x):
     """
     return (x - K.mean(x)) / K.std(x)
 
-class Dense2(Layer):
+class Dense2(keras.layers.Layer):
     input_ndim = 2
 
     def __init__(self, extra_inputs, batch_size, size, output_dim, init='glorot_uniform', activation='linear', weights=None,
@@ -52,7 +54,7 @@ class Dense2(Layer):
 
     def build(self):
         input_dim = self.input_shape[1]
-        input_dim += self.extra_dims
+        input_dim += self.extra_dim
 
         self.W_extra = self.init((input_dim, self.extra_dim),
                            name='{}_W_extra'.format(self.name))
@@ -89,18 +91,20 @@ class Dense2(Layer):
         return (self.input_shape[0], self.output_dim)
 
     def get_output(self, train=False):
-        (batch_start, batch_end) = self.batches[counter]
+        (batch_start, batch_end) = self.batches[self.counter]
 
         X = self.get_input(train)
-        X_concat = np.concatenate(X, self.extra_inputs[batch_start:batch_end, :], axis=1)
-        W_concat = np.concatenate(self.W, self.W_extra, axis=0)
+	if X.shape[0] != self.extra_inputs.shape[0]:
+	    output = self.activation(K.dot(X, self.W) + self.b)
+	else:
+            X_concat = np.concatenate((X, self.extra_inputs[batch_start:batch_end, :]), axis=1)
+            W_concat = np.concatenate((self.W, self.W_extra), axis=0)
+	    output = self.activation(K.dot(X_concat, W_concat) + self.b)
 
-        output = self.activation(K.dot(X_concat, W_concat) + self.b)
-
-        if counter = self.nb_batch:
-            cunter = 0
+        if self.counter == self.nb_batch:
+            self.counter = 0
         else:
-            counter += 1
+            self.counter += 1
 
         return output
 
@@ -159,8 +163,8 @@ def get_model():
 
 
     model.add(Flatten())
-    model.add(Dense(np.rand.random((5, 500), 32, 500, 1024, W_extra_regularizer=l2(1e-3), W_regularizer=l2(1e-3)))
-    # model.add(Dense(1024, W_regularizer=l2(1e-3)))
+    model.add(Dense2(np.random.rand(4265, 2), 32, 500, 1024, W_extra_regularizer=l2(1e-3), W_regularizer=l2(1e-3)))
+    #model.add(Dense(1024, W_regularizer=l2(1e-3)))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1))

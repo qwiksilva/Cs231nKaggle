@@ -73,7 +73,7 @@ def train():
     # Zero-center the data
     X_train = X_train - np.mean(X_train, axis=0)
     X_test = X_test - np.mean(X_test, axis=0)
-
+    print(X_train.shape)
     nb_iter = 200
     epochs_per_iter = 1
     batch_size = 32
