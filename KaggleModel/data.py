@@ -20,8 +20,8 @@ def crop_resize(images, circles):
         center = circles[i]
         stack = images[i]
         # we crop image from center
-        cen_x = np.round(center[0])
-        cen_y = np.round(center[1])
+        cen_x = np.round(center[1])
+        cen_y = np.round(center[0])
         if cen_x - crop_size[0]/2 < 0:
             x = 0
             xx = crop_size[1]
@@ -114,11 +114,15 @@ def load_images(from_dir, verbose=True):
                     images = []
                 if current_study != study_id:
                     if current_study != "":
-                        ids.append(current_study)
-                        all_study_images = np.array(current_study_images)
-                        centers = calc_rois(all_study_images)
-                        study_to_images[current_study] = crop_resize(all_study_images, centers)
-                        metadata[current_study] = np.array([pixel_scale, slice_thickness])
+                        print(study_id)
+                        try:
+                            ids.append(current_study)
+                            all_study_images = np.array(current_study_images)
+                            centers = calc_rois(all_study_images)
+                            study_to_images[current_study] = crop_resize(all_study_images, centers)
+                            metadata[current_study] = np.array([pixel_scale, slice_thickness])
+                        except:
+                            pass
 
                     current_study = study_id
                     current_study_images = []
@@ -145,13 +149,16 @@ def load_images(from_dir, verbose=True):
     print('All DICOM in {0} images loaded.'.format(from_dir))
     print('-'*50)
 
-    current_study_images.append(images)
-    study_to_images[current_study] = np.array(current_study_images)
-    if current_study != "":
-        ids.append(current_study)
-        all_study_images = np.array(current_study_images)
-        centers = calc_rois(all_study_images)
-        study_to_images[current_study] = crop_resize(all_study_images, centers)
+    try:
+        current_study_images.append(images)
+        study_to_images[current_study] = np.array(current_study_images)
+        if current_study != "":
+            ids.append(current_study)
+            all_study_images = np.array(current_study_images)
+            centers = calc_rois(all_study_images)
+            study_to_images[current_study] = crop_resize(all_study_images, centers)
+    except:
+        pass
     return ids, study_to_images, metadata
 
 
@@ -161,7 +168,7 @@ def map_studies_results():
     Maps studies to their respective targets.
     """
     id_to_results = dict()
-    train_csv = open('/data/KaggleData/train.csv') # /data/KaggleData/train.csv
+    train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
     lines = train_csv.readlines()
     i = 0
     for item in lines:
@@ -181,21 +188,24 @@ def write_train_npy():
     print('-'*50)
     print('Writing training data to .npy file...')
     print('-'*50)
-
-    study_ids, images, all_metadata = load_images('/data/KaggleData/train')
+    study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
+    #study_ids, images, all_metadata = load_images('/data/KaggleData/train')
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
     metadata = []
-
+    
     for study_id in study_ids:
-        study = images[study_id]
-        study_metadata = all_metadata[study_id]
-        outputs = studies_to_results[study_id]
-        all_study_images = np.concatenate(study)
-        X.append(all_study_images)
-        y.append(outputs)
-        metadata.append(study_metadata)
+        try:
+            study = images[study_id]
+            study_metadata = all_metadata[study_id]
+            outputs = studies_to_results[study_id]
+            all_study_images = np.concatenate(study)
+            X.append(all_study_images)
+            y.append(outputs)
+            metadata.append(study_metadata)
+        except:
+            pass
 
     X_new = []
     maxDepth = np.max([stack.shape[0] for stack in X])
@@ -206,9 +216,10 @@ def write_train_npy():
 
     X = np.array(X_new, dtype=np.uint8)
     y = np.array(y)
-    np.save('/data/tmp/X_train.npy', X)
-    np.save('/data/tmp/y_train.npy', y)
-    np.save('/data/tmp/metadata.npy', study_metadata)
+    study_metadata = np.array(study_metadata, dtype=np.float64)
+    np.save('data/tmp/X_train.npy', X)
+    np.save('data/tmp/y_train.npy', y)
+    np.save('data/tmp/metadata_train.npy', study_metadata)
     print('Done.')
 
 
@@ -220,17 +231,21 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
+    ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
+    #ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
     metadata = []
 
     for study_id in ids:
-        study = images[study_id]
-        study_metadata = all_metadata[study_id]
-        all_study_images = np.concatenate(study)
-        X.append(all_study_images)
-        metadata.append(study_metadata)
+        try:
+            study = images[study_id]
+            study_metadata = all_metadata[study_id]
+            all_study_images = np.concatenate(study)
+            X.append(all_study_images)
+            metadata.append(study_metadata)
+        except:
+            pass
 
     X_new = []
     maxDepth = np.max([stack.shape[0] for stack in X])
@@ -240,8 +255,10 @@ def write_validation_npy():
         X_new.append(stack)
 
     X = np.array(X_new, dtype=np.uint8)
-    np.save('/data/tmp/X_validate.npy', X)
-    np.save('/data/tmp/ids_validate.npy', study_ids)
+    study_metadata = np.array(study_metadata, dtype=np.float64)
+    np.save('data/tmp/X_validate.npy', X)
+    np.save('data/tmp/ids_validate.npy', study_ids)
+    np.save('data/tmp/metadata_val.npy', study_metadata)
     print('Done.')
 
 
