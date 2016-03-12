@@ -1,6 +1,7 @@
 from __future__ import print_function
 
-import keras.layers.Layer
+import numpy as np
+import keras
 from keras.models import Sequential
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers.core import Activation, Dense, Flatten, Dropout
@@ -17,7 +18,7 @@ def center_normalize(x):
     """
     return (x - K.mean(x)) / K.std(x)
 
-class Dense2(Layer):
+class Dense2(keras.layers.core.Layer):
     input_ndim = 2
 
     def __init__(self, extra_inputs, batch_size, size, output_dim, init='glorot_uniform', activation='linear', weights=None,
@@ -89,13 +90,17 @@ class Dense2(Layer):
         return (self.input_shape[0], self.output_dim)
 
     def get_output(self, train=False):
-        (batch_start, batch_end) = self.batches[counter]
+        (batch_start, batch_end) = self.batches[self.counter]
 
         X = self.get_input(train)
         if X.shape[0] != self.extra_inputs.shape[0]:
+	    f = open('test1.txt', 'a')
             print("not adding extra inputs")
+	    f.write('X shape ' + str(X.shape) +  ' extra shape ' + str(self.extra_inputs.shape)+'\n')
             output = self.activation(K.dot(X, self.W) + self.b)
         else:
+	    f = open('test.txt', 'w+')
+	    f.write('X shape ', X.shape, ' extra shape ', self.extra_inputs.shape)
             X_concat = np.concatenate((X, self.extra_inputs[batch_start:batch_end, :]), axis=1)
             W_concat = np.concatenate((self.W, self.W_extra), axis=0)
             output = self.activation(K.dot(X_concat, W_concat) + self.b)
