@@ -7,7 +7,7 @@ import os.path
 
 from model import get_model
 from utils import crps, real_to_cdf, preprocess, rotation_augmentation, shift_augmentation, root_mean_squared_error
-from theano import tensor.as_tensor_variable
+from theano.tensor import as_tensor_variable
 
 def load_train_data():
     """
