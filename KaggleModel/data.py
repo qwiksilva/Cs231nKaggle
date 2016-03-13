@@ -213,9 +213,6 @@ def write_train_npy():
             pass
 
     X_new = []
-    print(len(X))
-    print(X[0])
-    print(X[0].shape)
     maxDepth = np.max([stack.shape[0] for stack in X])
     for stack in X:
         # Concatenate blank images until all stacks are equal size
@@ -224,8 +221,6 @@ def write_train_npy():
 
     X = np.array(X_new, dtype=np.uint8)
     y = np.array(y)
-    print(X.shape)
-    sys.exit(0)
     study_metadata = np.array(study_metadata, dtype=np.float64)
     np.save('data/preprocessed/X_train.npy', X)
     np.save('data/preprocessed/y_train.npy', y)
