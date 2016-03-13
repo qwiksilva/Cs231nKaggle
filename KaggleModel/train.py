@@ -61,6 +61,7 @@ def train():
 
     #import best model if it exists
     if os.path.isfile('/data/run/weights_systole_best.hdf5'):
+        print('loading weights')
         model_systole.load_weights('/data/run/weights_systole_best.hdf5')
 
     if os.path.isfile('/data/run/weights_diastole_best.hdf5'):
@@ -79,7 +80,7 @@ def train():
 
     nb_iter = 200
     epochs_per_iter = 1
-    batch_size = 32
+    batch_size = 8
     calc_crps = 5  # calculate CRPS every n-th iteration (set to 0 if CRPS estimation is not needed)
 
     # remember min val. losses (best iterations), used as sigmas for submission
