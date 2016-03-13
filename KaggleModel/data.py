@@ -43,9 +43,9 @@ def crop_resize(images, circles):
             y = cen_y - crop_size[1]/2
             yy = y+crop_size[1]
 
-        imgs = stack[:, x:xx, y:yy]
-        imgs = imresize(imgs, img_scale)
-        crops.append(imgs)
+        cropped = stack[:, x:xx, y:yy]
+        for i in xrange(cropped.shape[0]):
+            crops.append(imresize(cropped[i,:,:], img_scale))
     
     return np.array(crops)
 
