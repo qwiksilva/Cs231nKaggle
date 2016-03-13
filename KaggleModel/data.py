@@ -8,7 +8,7 @@ from segment import calc_rois
 import pickle
 
 crop_size = (128, 128)
-#crop_size = (96, 96)
+scale_size = (64, 64)
 
 def crop_resize(images, circles):
     """
@@ -43,8 +43,9 @@ def crop_resize(images, circles):
             y = cen_y - crop_size[1]/2
             yy = y+crop_size[1]
 
-        crop_img = stack[:, x:xx, y:yy]
-        crops.append(crop_img)
+        imgs = stack[:, x:xx, y:yy]
+        imgs = imresize(imgs, img_scale)
+        crops.append(imgs)
     
     return np.array(crops)
 
@@ -89,15 +90,12 @@ def load_images(from_dir, verbose=True):
                 
                 image = dicom.read_file(image_path)
                 if not pixel_scale:
-                    pixel_scale = float(image.PixelSpacing[0])
+                    pixel_scale = float(image.PixelSpacing[0])*2.0
                 if not slice_thickness:
                     slice_thickness = float(image.SliceThickness)
                 image = image.pixel_array.astype(float)
 
-                # image /= np.max(image)  # scale to [0,1]
-
-                # if img_resize:
-                #     image = crop_resize(image)
+                image /= np.max(image)  # scale to [0,1]
 
                 if current_study_sub != subdir:
                     x = 0
@@ -169,8 +167,8 @@ def map_studies_results():
     Maps studies to their respective targets.
     """
     id_to_results = dict()
-    #train_csv = open('/data/KaggleData/train.csv')
-    train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
+    train_csv = open('/data/KaggleData/train.csv')
+    #train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
     lines = train_csv.readlines()
     i = 0
     for item in lines:
@@ -192,11 +190,9 @@ def write_train_npy():
     print('-'*50)
     study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
     #study_ids, images, all_metadata = load_images('/data/KaggleData/train')
-    print('pickling...')
-    pickle.dump(study_ids, open('study_ids.p', 'wb'))
-    pickle.dump(images, open('images.p', 'wb'))
-    pickle.dump(all_metadata, open('all_metadata.p', 'wb'))
-    print('done pickling.')
+    # pickle.dump(study_ids, open('study_ids.p', 'wb'))
+    # pickle.dump(images, open('images.p', 'wb'))
+    # pickle.dump(all_metadata, open('all_metadata.p', 'wb'))
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
@@ -239,8 +235,8 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
-    #ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
+    #ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
+    ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
     metadata = []

@@ -24,17 +24,17 @@ def get_model():
     graph.add_input(name='input2', input_shape=(2,)) # 2,498
     graph.add_node(Activation(activation=center_normalize), name='center_normalize', input='input1')
     
-    graph.add_node(Convolution2D(64, 3, 3, border_mode='same'), name='Convolution2D1_1', input='center_normalize')
+    graph.add_node(Convolution2D(128, 3, 3, border_mode='same'), name='Convolution2D1_1', input='center_normalize')
     graph.add_node(Activation('relu'), name='relu1_1', input='Convolution2D1_1')
-    graph.add_node(Convolution2D(64, 3, 3, border_mode='valid'), name='Convolution2D1_2', input='relu1_1')
+    graph.add_node(Convolution2D(128, 3, 3, border_mode='valid'), name='Convolution2D1_2', input='relu1_1')
     graph.add_node(Activation('relu'), name='relu1_2', input='Convolution2D1_2')
     graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad1', input='relu1_2')
     graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool1', input='zeropad1')
     graph.add_node(Dropout(0.25), name='dropout1', input='maxpool1')
 
-    graph.add_node(Convolution2D(64, 3, 3, border_mode='same'), name='Convolution2D2_1', input='dropout1')
+    graph.add_node(Convolution2D(96, 3, 3, border_mode='same'), name='Convolution2D2_1', input='dropout1')
     graph.add_node(Activation('relu'), name='relu2_1', input='Convolution2D2_1')
-    graph.add_node(Convolution2D(64, 3, 3, border_mode='valid'), name='Convolution2D2_2', input='relu2_1')
+    graph.add_node(Convolution2D(96, 3, 3, border_mode='valid'), name='Convolution2D2_2', input='relu2_1')
     graph.add_node(Activation('relu'), name='relu2_2', input='Convolution2D2_2')
     graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad2', input='relu2_2')
     graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool2', input='zeropad2')
