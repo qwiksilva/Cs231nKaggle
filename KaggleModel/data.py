@@ -45,7 +45,7 @@ def crop_resize(images, circles):
 
         cropped = stack[:, x:xx, y:yy]
         for i in xrange(cropped.shape[0]):
-            crops.append(imresize(cropped[i,:,:], img_scale))
+            crops.append(imresize(cropped[i,:,:], scale_size))
     
     return np.array(crops)
 
@@ -167,8 +167,8 @@ def map_studies_results():
     Maps studies to their respective targets.
     """
     id_to_results = dict()
-    train_csv = open('/data/KaggleData/train.csv')
-    #train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
+    #train_csv = open('/data/KaggleData/train.csv')
+    train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
     lines = train_csv.readlines()
     i = 0
     for item in lines:
@@ -188,8 +188,8 @@ def write_train_npy():
     print('-'*50)
     print('Writing training data to .npy file...')
     print('-'*50)
-    # study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
-    study_ids, images, all_metadata = load_images('/data/KaggleData/train')
+    study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/toyz')
+    #study_ids, images, all_metadata = load_images('/data/KaggleData/train')
 
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
@@ -197,12 +197,12 @@ def write_train_npy():
     metadata = []
     
     for study_id in study_ids:
-        print('Processing id: ', study_id)
         try:
+            print('Processing id: ', study_id)
             study = images[study_id]
             study_metadata = all_metadata[study_id]
             outputs = studies_to_results[study_id]
-            all_study_images = np.concatenate(study)
+            all_study_images = np.append(study, axis = 1)
             X.append(all_study_images)
             y.append(outputs)
             metadata.append(study_metadata)
@@ -210,6 +210,9 @@ def write_train_npy():
             pass
 
     X_new = []
+    print(len(X))
+    print(X[0])
+    print(X[0].shape)
     maxDepth = np.max([stack.shape[0] for stack in X])
     for stack in X:
         # Concatenate blank images until all stacks are equal size
@@ -218,10 +221,12 @@ def write_train_npy():
 
     X = np.array(X_new, dtype=np.uint8)
     y = np.array(y)
+    print(X.shape)
+    sys.exit(0)
     study_metadata = np.array(study_metadata, dtype=np.float64)
-    np.save('/data/preprocessed/X_train.npy', X)
-    np.save('/data/preprocessed/y_train.npy', y)
-    np.save('/data/preprocessed/metadata_train.npy', study_metadata)
+    np.save('data/preprocessed/X_train.npy', X)
+    np.save('data/preprocessed/y_train.npy', y)
+    np.save('data/preprocessed/metadata_train.npy', study_metadata)
     print('Done.')
 
 
@@ -233,8 +238,8 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    #ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
-    ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
+    ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/toyz')
+    #ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
     metadata = []
@@ -248,7 +253,6 @@ def write_validation_npy():
             metadata.append(study_metadata)
         except:
             pass
-
     X_new = []
     maxDepth = np.max([stack.shape[0] for stack in X])
     for stack in X:
