@@ -90,7 +90,7 @@ def load_images(from_dir, verbose=True):
                 
                 image = dicom.read_file(image_path)
                 if not pixel_scale:
-                    pixel_scale = float(image.PixelSpacing[0])
+                    pixel_scale = float(image.PixelSpacing[0])*2.0
                 if not slice_thickness:
                     slice_thickness = float(image.SliceThickness)
                 image = image.pixel_array.astype(float)
