@@ -169,8 +169,8 @@ def map_studies_results():
     Maps studies to their respective targets.
     """
     id_to_results = dict()
-    train_csv = open('/data/KaggleData/train.csv')
-    # train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
+    #train_csv = open('/data/KaggleData/train.csv')
+    train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
     lines = train_csv.readlines()
     i = 0
     for item in lines:
@@ -190,11 +190,13 @@ def write_train_npy():
     print('-'*50)
     print('Writing training data to .npy file...')
     print('-'*50)
-    # study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
-    study_ids, images, all_metadata = load_images('/data/KaggleData/train')
+    study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
+    #study_ids, images, all_metadata = load_images('/data/KaggleData/train')
+    print('pickling...')
     pickle.dump(study_ids, open('study_ids.p', 'wb'))
     pickle.dump(images, open('images.p', 'wb'))
     pickle.dump(all_metadata, open('all_metadata.p', 'wb'))
+    print('done pickling.')
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
@@ -237,8 +239,8 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    # ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
-    ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
+    ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
+    #ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
     metadata = []
