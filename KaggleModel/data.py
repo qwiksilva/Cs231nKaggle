@@ -122,6 +122,7 @@ def load_images(from_dir, verbose=True):
                             centers = calc_rois(all_study_images)
                             study_to_images[current_study] = crop_resize(all_study_images, centers)
                             metadata[current_study] = np.array([pixel_scale, slice_thickness])
+                            print('shape for : ', current_study, study_to_images[current_study].shape)
                         except:
                             pass
 
