@@ -148,19 +148,19 @@ def train():
         # for best (lowest) val losses, save weights
         if val_loss_systole < min_val_loss_systole:
             min_val_loss_systole = val_loss_systole
-            model_systole.save_weights('/data/weights_systole_best.hdf5', overwrite=True)
+            model_systole.save_weights('/data/run/weights_systole_best.hdf5', overwrite=True)
 
         if val_loss_diastole < min_val_loss_diastole:
             min_val_loss_diastole = val_loss_diastole
-            model_diastole.save_weights('/data/weights_diastole_best.hdf5', overwrite=True)
+            model_diastole.save_weights('/data/run/weights_diastole_best.hdf5', overwrite=True)
 
         # save best (lowest) val losses in file (to be later used for generating submission)
-        with open('val_loss.txt', mode='w+') as f:
+        with open('/data/run/val_loss.txt', mode='w+') as f:
             f.write(str(min_val_loss_systole))
             f.write('\n')
             f.write(str(min_val_loss_diastole))
 
-        with open("loss2.txt", "a+") as myfile:
+        with open("/data/run/loss.txt", "a+") as myfile:
             myfile.write('\t'.join((str(i+1), str(loss_systole),str(loss_diastole),str(val_loss_systole),str(val_loss_diastole), str(crps_train), str(crps_test))))
             myfile.write('\n')
 

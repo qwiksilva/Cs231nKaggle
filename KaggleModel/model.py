@@ -21,7 +21,7 @@ def center_normalize(x):
 
 def get_model():
     graph = Graph()
-    graph.add_input(name='input1', input_shape=(30,64,64)) #_,128,128
+    graph.add_input(name='input1', input_shape=(660,64,64)) #_,128,128
     graph.add_input(name='input2', input_shape=(2,)) # 2,498
     graph.add_node(Activation(activation=center_normalize), name='center_normalize', input='input1')
     
