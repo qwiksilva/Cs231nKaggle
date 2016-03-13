@@ -58,12 +58,12 @@ def train():
     model_systole = get_model()
     model_diastole = get_model()
 
-    #import best model if it exists
-    if os.path.isfile('weights_systole_best.hdf5'):
-        model_systole.load_weights('weights_systole_best.hdf5')
+    # #import best model if it exists
+    # if os.path.isfile('weights_systole_best.hdf5'):
+    #     model_systole.load_weights('weights_systole_best.hdf5')
 
-    if os.path.isfile('weights_diastole_best.hdf5'):
-        model_diastole.load_weights('weights_diastole_best.hdf5')
+    # if os.path.isfile('weights_diastole_best.hdf5'):
+    #     model_diastole.load_weights('weights_diastole_best.hdf5')
 
     print('Loading training data...')
     X, y, metadata = load_train_data()
@@ -148,11 +148,11 @@ def train():
         # for best (lowest) val losses, save weights
         if val_loss_systole < min_val_loss_systole:
             min_val_loss_systole = val_loss_systole
-            model_systole.save_weights('weights_systole_best.hdf5', overwrite=True)
+            model_systole.save_weights('/data/weights_systole_best.hdf5', overwrite=True)
 
         if val_loss_diastole < min_val_loss_diastole:
             min_val_loss_diastole = val_loss_diastole
-            model_diastole.save_weights('weights_diastole_best.hdf5', overwrite=True)
+            model_diastole.save_weights('/data/weights_diastole_best.hdf5', overwrite=True)
 
         # save best (lowest) val losses in file (to be later used for generating submission)
         with open('val_loss.txt', mode='w+') as f:
