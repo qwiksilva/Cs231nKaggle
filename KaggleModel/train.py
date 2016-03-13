@@ -92,7 +92,7 @@ def train():
     print('Training...')
     print('-'*50)
 
-    for i in range(0,nb_iter):
+    for i in range(26,nb_iter):
         print('-'*50)
         print('Iteration {0}/{1}'.format(i + 1, nb_iter))
         print('-'*50)
