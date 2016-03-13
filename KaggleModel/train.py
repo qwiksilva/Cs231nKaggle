@@ -59,12 +59,12 @@ def train():
     model_systole = get_model()
     model_diastole = get_model()
 
-    # #import best model if it exists
-    # if os.path.isfile('weights_systole_best.hdf5'):
-    #     model_systole.load_weights('weights_systole_best.hdf5')
+    #import best model if it exists
+    if os.path.isfile('/data/run/weights_systole_best.hdf5'):
+        model_systole.load_weights('/data/run/weights_systole_best.hdf5')
 
-    # if os.path.isfile('weights_diastole_best.hdf5'):
-    #     model_diastole.load_weights('weights_diastole_best.hdf5')
+    if os.path.isfile('/data/run/weights_diastole_best.hdf5'):
+        model_diastole.load_weights('/data/run/weights_diastole_best.hdf5')
 
     print('Loading training data...')
     X, y, metadata = load_train_data()
@@ -97,8 +97,8 @@ def train():
 
         #print('Augmenting images - rotations')
         #X_train_aug = rotation_augmentation(X_train, 15)
-        #print('Augmenting images - shifts')
-        #X_train_aug = shift_augmentation(X_train_aug, 0.1, 0.1)
+        print('Augmenting images - shifts')
+        X_train_aug = shift_augmentation(X_train_aug, 0.1, 0.1)
         X_train_aug = X_train
 
         print('Fitting systole model...')
