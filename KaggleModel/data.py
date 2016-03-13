@@ -221,7 +221,7 @@ def write_train_npy():
 
     X = np.array(X_new, dtype=np.uint8)
     y = np.array(y)
-    study_metadata = np.array(study_metadata, dtype=np.float64)
+    study_metadata = np.array(metadata, dtype=np.float64)
     np.save('/data/preprocessed/X_train.npy', X)
     np.save('/data/preprocessed/y_train.npy', y)
     np.save('/data/preprocessed/metadata_train.npy', study_metadata)
