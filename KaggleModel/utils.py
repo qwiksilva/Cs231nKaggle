@@ -56,7 +56,7 @@ def rotation_augmentation(X, angle_range):
     progbar = Progbar(X.shape[0])  # progress bar for augmentation status tracking
 
     X_rot = np.copy(X)
-    for i in range(len(X)):
+    for i in np.random.choice(len(X), 150):
         angle = np.random.randint(-angle_range, angle_range)
         for j in range(X.shape[1]):
             X_rot[i, j] = ndimage.rotate(X[i, j], angle, reshape=False, order=1)
