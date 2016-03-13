@@ -50,7 +50,7 @@ def get_model():
     graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad3', input='relu3_2')
     graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool3', input='zeropad3')
     graph.add_node(Dropout(0.25), name='dropout3', input='maxpool3')
-    raph.add_node(BatchNormalization(axis=1), name='batchnorm3', input='dropout3')
+    graph.add_node(BatchNormalization(axis=1), name='batchnorm3', input='dropout3')
 
     graph.add_node(Flatten(), name='flatten', input='batchnorm3')
     graph.add_node(Dense(1024, W_regularizer=l2(5e-3)), name='dense1', inputs=['flatten', 'input2'], merge_mode='concat', concat_axis=1)
