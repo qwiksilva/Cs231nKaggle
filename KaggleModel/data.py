@@ -208,7 +208,7 @@ def write_train_npy():
             all_study_images = np.concatenate(study)
             X.append(all_study_images)
             y.append(outputs)
-            metadata.append(study_metadata)
+            metadata = np.vstack(metadata, study_metadata)
         except:
             pass
 
@@ -221,10 +221,10 @@ def write_train_npy():
 
     X = np.array(X_new, dtype=np.uint8)
     y = np.array(y)
-    study_metadata = np.array(metadata, dtype=np.float64)
+    #study_metadata = np.array(metadata, dtype=np.float64)
     np.save('/data/preprocessed/X_train.npy', X)
     np.save('/data/preprocessed/y_train.npy', y)
-    np.save('/data/preprocessed/metadata_train.npy', study_metadata)
+    np.save('/data/preprocessed/metadata_train.npy', metadata)
     print('Done.')
 
 
