@@ -53,9 +53,9 @@ def get_model():
     graph.add_node(BatchNormalization(axis=1), name='batchnorm3', input='dropout3')
 
     graph.add_node(Flatten(), name='flatten', input='batchnorm3')
-    graph.add_node(Dense(1024, W_regularizer=l2(5e-3)), name='dense1', inputs=['flatten', 'input2'], merge_mode='concat', concat_axis=1)
+    graph.add_node(Dense(1024, W_regularizer=l2(1e-2)), name='dense1', inputs=['flatten', 'input2'], merge_mode='concat', concat_axis=1)
     graph.add_node(Activation('relu'), name='relu4', input='dense1')
-    graph.add_node(Dense(1, W_regularizer=l2(5e-3)), name='output', input='relu4', create_output=True)
+    graph.add_node(Dense(1, W_regularizer=l2(1e-2)), name='output', input='relu4', create_output=True)
 
     adam = Adam(lr=0.0001)
     graph.compile(optimizer=adam, loss={'output':root_mean_squared_error})
