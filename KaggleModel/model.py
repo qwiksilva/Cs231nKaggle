@@ -21,7 +21,7 @@ def center_normalize(x):
 
 def get_model():
     graph = Graph()
-    graph.add_input(name='input1', input_shape=(660,64,64)) #_,128,128
+    graph.add_input(name='input1', input_shape=(30*15,64,64)) #_,128,128
     graph.add_input(name='input2', input_shape=(2,)) # 2,498
     graph.add_node(Activation(activation=center_normalize), name='center_normalize', input='input1')
     
@@ -50,9 +50,9 @@ def get_model():
     graph.add_node(Dropout(0.25), name='dropout3', input='maxpool3')
 
     graph.add_node(Flatten(), name='flatten', input='dropout3')
-    graph.add_node(Dense(1024, W_regularizer=l2(1e-3)), name='dense1', inputs=['flatten', 'input2'], merge_mode='concat', concat_axis=1)
+    graph.add_node(Dense(1024, W_regularizer=l2(5e-3)), name='dense1', inputs=['flatten', 'input2'], merge_mode='concat', concat_axis=1)
     graph.add_node(Activation('relu'), name='relu4', input='dense1')
-    graph.add_node(Dense(1), name='output', input='relu4', create_output=True)
+    graph.add_node(Dense(1, W_regularizer=l2(5e-3)), name='output', input='relu4', create_output=True)
 
     adam = Adam(lr=0.0001)
     graph.compile(optimizer=adam, loss={'output':root_mean_squared_error})

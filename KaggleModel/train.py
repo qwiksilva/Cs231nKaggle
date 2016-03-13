@@ -17,6 +17,7 @@ def load_train_data():
     y = np.load('/data/preprocessed/y_train.npy')
     metadata = np.load('/data/preprocessed/metadata_train.npy')
 
+    X = X[:, :30*15, :, :]
     X = X.astype(np.float32)
     X /= 255
 
@@ -96,11 +97,11 @@ def train():
         print('Iteration {0}/{1}'.format(i + 1, nb_iter))
         print('-'*50)
 
-        # print('Augmenting images - rotations')
-        # X_train_aug = rotation_augmentation(X_train, 15)
-        # print('Augmenting images - shifts')
-        # X_train_aug = shift_augmentation(X_train_aug, 0.1, 0.1)
-        X_train_aug = X_train
+        print('Augmenting images - rotations')
+        X_train_aug = rotation_augmentation(X_train, 15)
+        print('Augmenting images - shifts')
+        X_train_aug = shift_augmentation(X_train_aug, 0.1, 0.1)
+        # X_train_aug = X_train
 
         print('Fitting systole model...')
         hist_systole = model_systole.fit({'input1':X_train_aug, 'input2':metadata_train, 'output':y_train[:, 0]}, shuffle=True, nb_epoch=epochs_per_iter,
@@ -150,19 +151,19 @@ def train():
         # for best (lowest) val losses, save weights
         if val_loss_systole < min_val_loss_systole:
             min_val_loss_systole = val_loss_systole
-            model_systole.save_weights('/data/run/weights_systole_best.hdf5', overwrite=True)
+            model_systole.save_weights('/data/run2/weights_systole_best.hdf5', overwrite=True)
 
         if val_loss_diastole < min_val_loss_diastole:
             min_val_loss_diastole = val_loss_diastole
-            model_diastole.save_weights('/data/run/weights_diastole_best.hdf5', overwrite=True)
+            model_diastole.save_weights('/data/run2/weights_diastole_best.hdf5', overwrite=True)
 
         # save best (lowest) val losses in file (to be later used for generating submission)
-        with open('/data/run/val_loss.txt', mode='w+') as f:
+        with open('/data/run2/val_loss.txt', mode='w+') as f:
             f.write(str(min_val_loss_systole))
             f.write('\n')
             f.write(str(min_val_loss_diastole))
 
-        with open("/data/run/loss.txt", "a+") as myfile:
+        with open("/data/run2/loss.txt", "a+") as myfile:
             myfile.write('\t'.join((str(i+1), str(loss_systole),str(loss_diastole),str(val_loss_systole),str(val_loss_diastole), str(crps_train), str(crps_test))))
             myfile.write('\n')
 
