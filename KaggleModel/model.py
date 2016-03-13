@@ -9,6 +9,7 @@ from keras.optimizers import Adam
 from keras.regularizers import l2
 from keras import backend as K
 from keras.layers.normalization import BatchNormalization
+from utils import root_mean_squared_error
 # from keras import activations, initializations, regularizers, constraints
 # from keras.regularizers import ActivityRegularizer
 

@@ -43,10 +43,12 @@ def crop_resize(images, circles):
             y = cen_y - crop_size[1]/2
             yy = y+crop_size[1]
 
+        tmp = []
         cropped = stack[:, x:xx, y:yy]
         for i in xrange(cropped.shape[0]):
-            crops.append(imresize(cropped[i,:,:], img_scale))
-    
+            tmp.append(imresize(cropped[i,:,:], scale_size))
+        crops.append(np.array(tmp))
+
     return np.array(crops)
 
 
@@ -120,6 +122,8 @@ def load_images(from_dir, verbose=True):
                             centers = calc_rois(all_study_images)
                             study_to_images[current_study] = crop_resize(all_study_images, centers)
                             metadata[current_study] = np.array([pixel_scale, slice_thickness])
+                            print('sanity check, size of study ', current_study, " ", study_to_images[current_study])
+                            print('metadata:', metadata[current_study])
                         except:
                             pass
 
