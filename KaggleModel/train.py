@@ -61,12 +61,12 @@ def train():
     model_diastole = get_model()
 
     #import best model if it exists
-    if os.path.isfile('/data/run/weights_systole_best.hdf5'):
-        print('loading weights')
-        model_systole.load_weights('/data/run/weights_systole_best.hdf5')
+    # if os.path.isfile('/data/run2/weights_systole_best.hdf5'):
+    #     print('loading weights')
+    #     model_systole.load_weights('/data/run2/weights_systole_best.hdf5')
 
-    if os.path.isfile('/data/run/weights_diastole_best.hdf5'):
-        model_diastole.load_weights('/data/run/weights_diastole_best.hdf5')
+    # if os.path.isfile('/data/run2/weights_diastole_best.hdf5'):
+    #     model_diastole.load_weights('/data/run2/weights_diastole_best.hdf5')
 
     print('Loading training data...')
     X, y, metadata = load_train_data()
