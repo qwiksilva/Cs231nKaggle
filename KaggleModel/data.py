@@ -168,7 +168,8 @@ def map_studies_results():
     Maps studies to their respective targets.
     """
     id_to_results = dict()
-    train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
+    train_csv = open('/data/KaggleData/train.csv')
+    # train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
     lines = train_csv.readlines()
     i = 0
     for item in lines:
@@ -188,14 +189,15 @@ def write_train_npy():
     print('-'*50)
     print('Writing training data to .npy file...')
     print('-'*50)
-    study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
-    #study_ids, images, all_metadata = load_images('/data/KaggleData/train')
+    # study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
+    study_ids, images, all_metadata = load_images('/data/KaggleData/train')
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
     metadata = []
     
     for study_id in study_ids:
+        print('Processing id: ', study_id)
         try:
             study = images[study_id]
             study_metadata = all_metadata[study_id]
@@ -231,8 +233,8 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
-    #ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
+    # ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
+    ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
     metadata = []
