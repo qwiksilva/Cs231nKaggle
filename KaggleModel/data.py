@@ -43,9 +43,9 @@ def crop_resize(images, circles):
             y = cen_y - crop_size[1]/2
             yy = y+crop_size[1]
 
-        imgs = stack[:, x:xx, y:yy]
-        imgs = imresize(imgs, img_scale)
-        crops.append(imgs)
+        cropped = stack[:, x:xx, y:yy]
+        for i in xrange(cropped.shape[0]):
+            crops.append(imresize(cropped[i,:,:], img_scale))
     
     return np.array(crops)
 
@@ -188,11 +188,9 @@ def write_train_npy():
     print('-'*50)
     print('Writing training data to .npy file...')
     print('-'*50)
-    study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
-    #study_ids, images, all_metadata = load_images('/data/KaggleData/train')
-    # pickle.dump(study_ids, open('study_ids.p', 'wb'))
-    # pickle.dump(images, open('images.p', 'wb'))
-    # pickle.dump(all_metadata, open('all_metadata.p', 'wb'))
+    # study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
+    study_ids, images, all_metadata = load_images('/data/KaggleData/train')
+
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
