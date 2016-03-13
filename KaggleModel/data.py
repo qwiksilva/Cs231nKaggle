@@ -8,7 +8,7 @@ from segment import calc_rois
 import pickle
 
 crop_size = (128, 128)
-#crop_size = (96, 96)
+scale_size = (64, 64)
 
 def crop_resize(images, circles):
     """
@@ -43,8 +43,9 @@ def crop_resize(images, circles):
             y = cen_y - crop_size[1]/2
             yy = y+crop_size[1]
 
-        crop_img = stack[:, x:xx, y:yy]
-        crops.append(crop_img)
+        imgs = stack[:, x:xx, y:yy]
+        imgs = imresize(imgs, img_scale)
+        crops.append(imgs)
     
     return np.array(crops)
 
@@ -94,10 +95,7 @@ def load_images(from_dir, verbose=True):
                     slice_thickness = float(image.SliceThickness)
                 image = image.pixel_array.astype(float)
 
-                # image /= np.max(image)  # scale to [0,1]
-
-                # if img_resize:
-                #     image = crop_resize(image)
+                image /= np.max(image)  # scale to [0,1]
 
                 if current_study_sub != subdir:
                     x = 0
