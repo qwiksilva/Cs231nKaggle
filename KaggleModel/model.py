@@ -31,7 +31,7 @@ def get_model():
     graph.add_node(Activation('relu'), name='relu1_2', input='Convolution2D1_2')
     graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad1', input='relu1_2')
     graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool1', input='zeropad1')
-    graph.add_node(Dropout(0.25), name='dropout1', input='maxpool1')
+    graph.add_node(Dropout(0.5), name='dropout1', input='maxpool1')
     graph.add_node(BatchNormalization(axis=1), name='batchnorm1', input='dropout1')
 
     graph.add_node(Convolution2D(96, 3, 3, border_mode='same'), name='Convolution2D2_1', input='batchnorm1')
@@ -40,7 +40,7 @@ def get_model():
     graph.add_node(Activation('relu'), name='relu2_2', input='Convolution2D2_2')
     graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad2', input='relu2_2')
     graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool2', input='zeropad2')
-    graph.add_node(Dropout(0.25), name='dropout2', input='maxpool2')
+    graph.add_node(Dropout(0.5), name='dropout2', input='maxpool2')
     graph.add_node(BatchNormalization(axis=1), name='batchnorm2', input='dropout2')
 
     graph.add_node(Convolution2D(64, 3, 3, border_mode='same'), name='Convolution2D3_1', input='batchnorm2')
@@ -49,13 +49,13 @@ def get_model():
     graph.add_node(Activation('relu'), name='relu3_2', input='Convolution2D3_2')
     graph.add_node(ZeroPadding2D(padding=(1, 1)), name='zeropad3', input='relu3_2')
     graph.add_node(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)), name='maxpool3', input='zeropad3')
-    graph.add_node(Dropout(0.25), name='dropout3', input='maxpool3')
+    graph.add_node(Dropout(0.5), name='dropout3', input='maxpool3')
     graph.add_node(BatchNormalization(axis=1), name='batchnorm3', input='dropout3')
 
     graph.add_node(Flatten(), name='flatten', input='batchnorm3')
-    graph.add_node(Dense(1024, W_regularizer=l2(1e-2)), name='dense1', inputs=['flatten', 'input2'], merge_mode='concat', concat_axis=1)
+    graph.add_node(Dense(1024, W_regularizer=l2(5e-1)), name='dense1', inputs=['flatten', 'input2'], merge_mode='concat', concat_axis=1)
     graph.add_node(Activation('relu'), name='relu4', input='dense1')
-    graph.add_node(Dense(1, W_regularizer=l2(1e-2)), name='output', input='relu4', create_output=True)
+    graph.add_node(Dense(1, W_regularizer=l2(5e-1)), name='output', input='relu4', create_output=True)
 
     adam = Adam(lr=0.0001)
     graph.compile(optimizer=adam, loss={'output':root_mean_squared_error})
