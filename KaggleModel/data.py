@@ -122,13 +122,7 @@ def load_images(from_dir, verbose=True):
                             centers = calc_rois(all_study_images)
                             study_to_images[current_study] = crop_resize(all_study_images, centers)
                             metadata[current_study] = np.array([pixel_scale, slice_thickness])
-                            print('sanity check, size of study ', current_study, " ", study_to_images[current_study].shape)
-                            print('max: ', np.max(study_to_images[current_study]))
-                            print('metadata:', metadata[current_study])
                         except:
-                            assert(study_to_images[current_study].shape[1] == 30)
-                            assert(study_to_images[current_study].shape[2] == 128)
-                            assert(study_to_images[current_study].shape[3] == 128)
                             pass
 
                     current_study = study_id
