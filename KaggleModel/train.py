@@ -123,20 +123,20 @@ def train():
             val_pred_diastole = model_diastole.predict({'input1':X_test, 'input2':metadata_test, 'output':y_test[:, 1]}, batch_size=batch_size, verbose=1)['output']
 
             # Get sigmas
-            sigma_systole = as_tensor_variable(root_mean_squared_error(y_train[:, 0], pred_systole))
-            sigma_diastole = as_tensor_variable(root_mean_squared_error(y_train[:, 1], pred_systole))
-            val_sigma_systole = as_tensor_variable(root_mean_squared_error(y_test[:, 0], val_pred_systole))
-            val_sigma_diastole = as_tensor_variable(root_mean_squared_error(y_test[:, 1], val_pred_diastole))
+            # sigma_systole = as_tensor_variable(root_mean_squared_error(y_train[:, 0], pred_systole))
+            # sigma_diastole = as_tensor_variable(root_mean_squared_error(y_train[:, 1], pred_systole))
+            # val_sigma_systole = as_tensor_variable(root_mean_squared_error(y_test[:, 0], val_pred_systole))
+            # val_sigma_diastole = as_tensor_variable(root_mean_squared_error(y_test[:, 1], val_pred_diastole))
 
             # CDF for train and test data (actually a step function)
             cdf_train = real_to_cdf(np.concatenate((y_train[:, 0], y_train[:, 1])))
             cdf_test = real_to_cdf(np.concatenate((y_test[:, 0], y_test[:, 1])))
 
             # CDF for predicted data
-            cdf_pred_systole = real_to_cdf(pred_systole, sigma_systole)
-            cdf_pred_diastole = real_to_cdf(pred_diastole, sigma_diastole)
-            cdf_val_pred_systole = real_to_cdf(val_pred_systole, val_sigma_systole)
-            cdf_val_pred_diastole = real_to_cdf(val_pred_diastole, val_sigma_diastole)
+            cdf_pred_systole = real_to_cdf(pred_systole, loss_systole)
+            cdf_pred_diastole = real_to_cdf(pred_diastole, loss_diastole)
+            cdf_val_pred_systole = real_to_cdf(val_pred_systole, val_loss_systole)
+            cdf_val_pred_diastole = real_to_cdf(val_pred_diastole, val_loss_diastole)
 
             # evaluate CRPS on training data
             crps_train = crps(cdf_train, np.concatenate((cdf_pred_systole, cdf_pred_diastole)))
