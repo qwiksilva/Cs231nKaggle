@@ -55,5 +55,5 @@ def get_model():
     graph.add_node(Dense(1), name='output', input='relu4', create_output=True)
 
     adam = Adam(lr=0.0001)
-    graph.compile(optimizer=adam, loss={'output':'mse'})
+    graph.compile(optimizer=adam, loss={'output':root_mean_squared_error})
     return graph

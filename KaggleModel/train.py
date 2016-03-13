@@ -7,6 +7,7 @@ import os.path
 
 from model import get_model
 from utils import crps, real_to_cdf, preprocess, rotation_augmentation, shift_augmentation, root_mean_squared_error
+from theano import tensor.as_tensor_variable
 
 def load_train_data():
     """
@@ -122,10 +123,10 @@ def train():
             val_pred_diastole = model_diastole.predict({'input1':X_test, 'input2':metadata_test, 'output':y_test[:, 1]}, batch_size=batch_size, verbose=1)['output']
 
             # Get sigmas
-            sigma_systole = root_mean_squared_error(y_train[:, 0], pred_systole)
-            sigma_diastole = root_mean_squared_error(y_train[:, 1], pred_systole)
-            val_sigma_systole = root_mean_squared_error(y_test[:, 0], val_pred_systole)
-            val_sigma_diastole = root_mean_squared_error(y_test[:, 1], val_pred_diastole)
+            sigma_systole = as_tensor_variable(root_mean_squared_error(y_train[:, 0], pred_systole))
+            sigma_diastole = as_tensor_variable(root_mean_squared_error(y_train[:, 1], pred_systole))
+            val_sigma_systole = as_tensor_variable(root_mean_squared_error(y_test[:, 0], val_pred_systole))
+            val_sigma_diastole = as_tensor_variable(root_mean_squared_error(y_test[:, 1], val_pred_diastole))
 
             # CDF for train and test data (actually a step function)
             cdf_train = real_to_cdf(np.concatenate((y_train[:, 0], y_train[:, 1])))
