@@ -190,9 +190,9 @@ def write_train_npy():
     print('-'*50)
     # study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
     study_ids, images, all_metadata = load_images('/data/KaggleData/train')
-    pickle.dump(study_ids, open('study_ids.p', 'wb'))
-    pickle.dump(images, open('images.p', 'wb'))
-    pickle.dump(all_metadata, open('all_metadata.p', 'wb'))
+    # pickle.dump(study_ids, open('study_ids.p', 'wb'))
+    # pickle.dump(images, open('images.p', 'wb'))
+    # pickle.dump(all_metadata, open('all_metadata.p', 'wb'))
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
