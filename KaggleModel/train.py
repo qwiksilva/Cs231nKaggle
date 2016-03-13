@@ -96,11 +96,11 @@ def train():
         print('Iteration {0}/{1}'.format(i + 1, nb_iter))
         print('-'*50)
 
-        print('Augmenting images - rotations')
-        X_train_aug = rotation_augmentation(X_train, 15)
-        print('Augmenting images - shifts')
-        X_train_aug = shift_augmentation(X_train_aug, 0.1, 0.1)
-        # X_train_aug = X_train
+        # print('Augmenting images - rotations')
+        # X_train_aug = rotation_augmentation(X_train, 15)
+        # print('Augmenting images - shifts')
+        # X_train_aug = shift_augmentation(X_train_aug, 0.1, 0.1)
+        X_train_aug = X_train
 
         print('Fitting systole model...')
         hist_systole = model_systole.fit({'input1':X_train_aug, 'input2':metadata_train, 'output':y_train[:, 0]}, shuffle=True, nb_epoch=epochs_per_iter,
