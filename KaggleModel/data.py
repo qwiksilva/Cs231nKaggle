@@ -191,7 +191,7 @@ def write_train_npy():
     print('Writing training data to .npy file...')
     print('-'*50)
     # study_ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/train')
-    study_ids, images, all_metadata = load_images('/data/tmp/')
+    study_ids, images, all_metadata = load_images('/data/KaggleData/train')
 
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
