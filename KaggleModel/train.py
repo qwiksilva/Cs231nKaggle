@@ -111,10 +111,10 @@ def train():
                                            batch_size=batch_size, validation_data={'input1':X_test, 'input2':metadata_test, 'output':y_test[:, 1]})
 
         # sigmas for predicted data, actually loss function values (RMSE)
-        loss_systole = np.sqrt(hist_systole.history['loss'][-1])
-        loss_diastole = np.sqrt(hist_diastole.history['loss'][-1])
-        val_loss_systole = np.sqrt(hist_systole.history['val_loss'][-1])
-        val_loss_diastole = np.sqrt(hist_diastole.history['val_loss'][-1])
+        loss_systole = hist_systole.history['loss'][-1]
+        loss_diastole = hist_diastole.history['loss'][-1]
+        val_loss_systole = hist_systole.history['val_loss'][-1]
+        val_loss_diastole = hist_diastole.history['val_loss'][-1]
 
         if calc_crps > 0 and i % calc_crps == 0:
             print('Evaluating CRPS...')
