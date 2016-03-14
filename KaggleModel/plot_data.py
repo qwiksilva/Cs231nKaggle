@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from train import load_train_data
 import csv
 
+
 # txt_file = r'/data/run2/loss.txt'
 # csv_file = r"mycsv.csv"
 
@@ -75,14 +76,21 @@ crps_train = crps(cdf_train, np.concatenate((cdf_pred_systole, cdf_pred_diastole
 print('CRPS(train) = {0}'.format(crps_train))
 
 # CDF
-plt.plot(cdf_train[0], cdf_pred_systole)
+#plt.figure()
+plt.plot(cdf_train[0], 'g-')
+plt.plot(cdf_pred_systole, 'b-')
 plt.xlabel('Volume')
 plt.ylabel('Probability')
 plt.title('Systole CDF vs Ground Truth (CRPS: ' + str(crps_train) + ")")
-plt.show()
+plt.legend(['Ground Truth CDF', 'Predicted Systole CDF'])
+plt.savefig('systole.png')
 
-plt.plot(cdf_train[1], cdf_pred_diastole)
+#plt.figure()
+plt.plot(cdf_train[1], 'g-')
+plt.plot(cdf_pred_diastole, 'b-')
 plt.xlabel('Volume')
 plt.ylabel('Probability')
 plt.title('Diastole CDF vs Ground Truth (CRPS: ' + str(crps_train) + ")")
+plt.legend(['Ground Truth CDF', 'Predicted Diastole CDF'])
 plt.show()
+plt.savefig('diastole.png')
