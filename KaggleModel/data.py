@@ -197,7 +197,7 @@ def write_train_npy():
     studies_to_results = map_studies_results()  # load the dictionary of studies to targets
     X = []
     y = []
-    metadata = []
+    metadata = np.zeros((1,2))
     
     for study_id in study_ids:
         try:
@@ -208,7 +208,7 @@ def write_train_npy():
             all_study_images = np.append(study, axis = 1)
             X.append(all_study_images)
             y.append(outputs)
-            metadata.append(study_metadata)
+            metadata = np.vstack((metadata, study_metadata))
         except:
             pass
 
@@ -221,10 +221,11 @@ def write_train_npy():
 
     X = np.array(X_new, dtype=np.uint8)
     y = np.array(y)
-    study_metadata = np.array(metadata, dtype=np.float64)
+    #study_metadata = np.array(metadata, dtype=np.float64)
+    metadata = metadata[1:, :]
     np.save('/data/preprocessed/X_train.npy', X)
     np.save('/data/preprocessed/y_train.npy', y)
-    np.save('/data/preprocessed/metadata_train.npy', study_metadata)
+    np.save('/data/preprocessed/metadata_train.npy', metadata)
     print('Done.')
 
 
