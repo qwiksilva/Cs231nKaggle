@@ -88,8 +88,8 @@ pred_diastole = model_diastole.predict({'input1':X[0:1,:,:,:], 'input2':metadata
 cdf_train = real_to_cdf(np.concatenate((y[0:1, 0], y[0:1, 1])))
 
 # CDF for predicted data
-cdf_pred_systole = real_to_cdf(pred_systole, loss_systole)
-cdf_pred_diastole = real_to_cdf(pred_diastole, loss_diastole)
+cdf_pred_systole = real_to_cdf(pred_systole, 27.7407048805)
+cdf_pred_diastole = real_to_cdf(pred_diastole, 38.5512729527)
 
 # evaluate CRPS on training data
 crps_train = crps(cdf_train, np.concatenate((cdf_pred_systole, cdf_pred_diastole)))
