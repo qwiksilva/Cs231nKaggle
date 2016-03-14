@@ -48,7 +48,7 @@ def crop_resize(images, circles):
         for i in xrange(cropped.shape[0]):
             tmp.append(imresize(cropped[i,:,:], scale_size))
         crops.append(np.array(tmp))
-
+        
     return np.array(crops)
 
 
@@ -170,8 +170,8 @@ def map_studies_results():
     Maps studies to their respective targets.
     """
     id_to_results = dict()
-    train_csv = open('/data/KaggleData/train.csv')
-    # train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
+    #train_csv = open('/data/KaggleData/train.csv')
+    train_csv = open('D:/Documents/CS231N/dataset/train.csv') # /data/KaggleData/train.csv
     lines = train_csv.readlines()
     i = 0
     for item in lines:
@@ -200,15 +200,15 @@ def write_train_npy():
     metadata = np.zeros((1,2))
     
     for study_id in study_ids:
-        print('Processing id: ', study_id)
         try:
+            print('Processing id: ', study_id)
             study = images[study_id]
             study_metadata = all_metadata[study_id]
             outputs = studies_to_results[study_id]
-            all_study_images = np.concatenate(study)
+            all_study_images = np.append(study, axis = 1)
             X.append(all_study_images)
             y.append(outputs)
-	    metadata = np.vstack((metadata, study_metadata))
+            metadata = np.vstack((metadata, study_metadata))
         except:
             pass
 
@@ -237,8 +237,8 @@ def write_validation_npy():
     print('Writing validation data to .npy file...')
     print('-'*50)
 
-    # ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/validate')
-    ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
+    ids, images, all_metadata = load_images('D:/Documents/CS231N/dataset/toyz')
+    #ids, images, all_metadata = load_images('/data/KaggleData/validate') # /data/KaggleData/validate
     study_ids = []
     X = []
     metadata = []
@@ -252,7 +252,6 @@ def write_validation_npy():
             metadata.append(study_metadata)
         except:
             pass
-
     X_new = []
     maxDepth = np.max([stack.shape[0] for stack in X])
     for stack in X:
