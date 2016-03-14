@@ -5,6 +5,7 @@ from scipy.stats import norm
 from skimage.restoration import denoise_tv_chambolle
 from scipy import ndimage
 from keras.utils.generic_utils import Progbar
+from keras import backend as K
 
 def root_mean_squared_error(y_true, y_pred):
     """

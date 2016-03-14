@@ -7,15 +7,17 @@ import os.path
 
 from model import get_model
 from utils import crps, real_to_cdf, preprocess, rotation_augmentation, shift_augmentation, root_mean_squared_error
+from theano.tensor import as_tensor_variable
 
 def load_train_data():
     """
     Load training data from .npy files.
     """
-    X = np.load('/data/pre/data/X_train.npy')
-    y = np.load('/data/pre/data/y_train.npy')
-    metadata = np.load('/data/pre/data/metadata_train.npy')
+    X = np.load('/data/preprocessed/X_train.npy')
+    y = np.load('/data/preprocessed/y_train.npy')
+    metadata = np.load('/data/preprocessed/metadata_train.npy')
 
+    X = X[:, :30*15, :, :]
     X = X.astype(np.float32)
     X /= 255
 
@@ -59,11 +61,12 @@ def train():
     model_diastole = get_model()
 
     #import best model if it exists
-    if os.path.isfile('weights_systole_best.hdf5'):
-        model_systole.load_weights('weights_systole_best.hdf5')
+    if os.path.isfile('/data/run2/weights_systole_best.hdf5'):
+        print('loading weights')
+        model_systole.load_weights('/data/run2/weights_systole_best.hdf5')
 
-    if os.path.isfile('weights_diastole_best.hdf5'):
-        model_diastole.load_weights('weights_diastole_best.hdf5')
+    if os.path.isfile('/data/run2/weights_diastole_best.hdf5'):
+        model_diastole.load_weights('/data/run2/weights_diastole_best.hdf5')
 
     print('Loading training data...')
     X, y, metadata = load_train_data()
@@ -78,7 +81,7 @@ def train():
 
     nb_iter = 200
     epochs_per_iter = 1
-    batch_size = 32
+    batch_size = 8
     calc_crps = 5  # calculate CRPS every n-th iteration (set to 0 if CRPS estimation is not needed)
 
     # remember min val. losses (best iterations), used as sigmas for submission
@@ -94,10 +97,12 @@ def train():
         print('Iteration {0}/{1}'.format(i + 1, nb_iter))
         print('-'*50)
 
-        #print('Augmenting images - rotations')
-        #X_train_aug = rotation_augmentation(X_train, 15)
-        #print('Augmenting images - shifts')
-        #X_train_aug = shift_augmentation(X_train_aug, 0.1, 0.1)
+        # print('Augmenting images - rotations')
+        # X_train_aug = rotation_augmentation(X_train, 15)
+        # print('Augmenting images - shifts')
+        # X_train_aug = shift_augmentation(X_train_aug, 0.1, 0.1)
+        # print('Augmenting images - shifts')
+        # X_train_aug = shift_augmentation(X_train, 0.1, 0.1)
         X_train_aug = X_train
 
         print('Fitting systole model...')
@@ -109,10 +114,10 @@ def train():
                                            batch_size=batch_size, validation_data={'input1':X_test, 'input2':metadata_test, 'output':y_test[:, 1]})
 
         # sigmas for predicted data, actually loss function values (RMSE)
-        loss_systole = np.sqrt(hist_systole.history['loss'][-1])
-        loss_diastole = np.sqrt(hist_diastole.history['loss'][-1])
-        val_loss_systole = np.sqrt(hist_systole.history['val_loss'][-1])
-        val_loss_diastole = np.sqrt(hist_diastole.history['val_loss'][-1])
+        loss_systole = hist_systole.history['loss'][-1]
+        loss_diastole = hist_diastole.history['loss'][-1]
+        val_loss_systole = hist_systole.history['val_loss'][-1]
+        val_loss_diastole = hist_diastole.history['val_loss'][-1]
 
         if calc_crps > 0 and i % calc_crps == 0:
             print('Evaluating CRPS...')
@@ -122,20 +127,20 @@ def train():
             val_pred_diastole = model_diastole.predict({'input1':X_test, 'input2':metadata_test, 'output':y_test[:, 1]}, batch_size=batch_size, verbose=1)['output']
 
             # Get sigmas
-            sigma_systole = root_mean_squared_error(y_train[:, 0], pred_systole)
-            sigma_diastole = root_mean_squared_error(y_train[:, 1], pred_systole)
-            val_sigma_systole = root_mean_squared_error(y_test[:, 0], val_pred_systole)
-            val_sigma_diastole = root_mean_squared_error(y_test[:, 1], val_pred_diastole)
+            # sigma_systole = as_tensor_variable(root_mean_squared_error(y_train[:, 0], pred_systole))
+            # sigma_diastole = as_tensor_variable(root_mean_squared_error(y_train[:, 1], pred_systole))
+            # val_sigma_systole = as_tensor_variable(root_mean_squared_error(y_test[:, 0], val_pred_systole))
+            # val_sigma_diastole = as_tensor_variable(root_mean_squared_error(y_test[:, 1], val_pred_diastole))
 
             # CDF for train and test data (actually a step function)
             cdf_train = real_to_cdf(np.concatenate((y_train[:, 0], y_train[:, 1])))
             cdf_test = real_to_cdf(np.concatenate((y_test[:, 0], y_test[:, 1])))
 
             # CDF for predicted data
-            cdf_pred_systole = real_to_cdf(pred_systole, sigma_systole)
-            cdf_pred_diastole = real_to_cdf(pred_diastole, sigma_diastole)
-            cdf_val_pred_systole = real_to_cdf(val_pred_systole, val_sigma_systole)
-            cdf_val_pred_diastole = real_to_cdf(val_pred_diastole, val_sigma_diastole)
+            cdf_pred_systole = real_to_cdf(pred_systole, loss_systole)
+            cdf_pred_diastole = real_to_cdf(pred_diastole, loss_diastole)
+            cdf_val_pred_systole = real_to_cdf(val_pred_systole, val_loss_systole)
+            cdf_val_pred_diastole = real_to_cdf(val_pred_diastole, val_loss_diastole)
 
             # evaluate CRPS on training data
             crps_train = crps(cdf_train, np.concatenate((cdf_pred_systole, cdf_pred_diastole)))
@@ -148,19 +153,19 @@ def train():
         # for best (lowest) val losses, save weights
         if val_loss_systole < min_val_loss_systole:
             min_val_loss_systole = val_loss_systole
-            model_systole.save_weights('weights_systole_best.hdf5', overwrite=True)
+            model_systole.save_weights('/data/run2/weights_systole_best.hdf5', overwrite=True)
 
         if val_loss_diastole < min_val_loss_diastole:
             min_val_loss_diastole = val_loss_diastole
-            model_diastole.save_weights('weights_diastole_best.hdf5', overwrite=True)
+            model_diastole.save_weights('/data/run2/weights_diastole_best.hdf5', overwrite=True)
 
         # save best (lowest) val losses in file (to be later used for generating submission)
-        with open('val_loss.txt', mode='w+') as f:
+        with open('/data/run2/val_loss.txt', mode='w+') as f:
             f.write(str(min_val_loss_systole))
             f.write('\n')
             f.write(str(min_val_loss_diastole))
 
-        with open("loss2.txt", "a+") as myfile:
+        with open("/data/run2/loss.txt", "a+") as myfile:
             myfile.write('\t'.join((str(i+1), str(loss_systole),str(loss_diastole),str(val_loss_systole),str(val_loss_diastole), str(crps_train), str(crps_test))))
             myfile.write('\n')
 
