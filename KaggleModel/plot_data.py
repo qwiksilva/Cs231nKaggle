@@ -85,7 +85,7 @@ pred_systole = model_systole.predict({'input1':X[0:1, :, : , :], 'input2':metada
 pred_diastole = model_diastole.predict({'input1':X[0:1,:,:,:], 'input2':metadata[0:1, :], 'output':y[0:1, 1]})['output']
 
 # CDF for train and test data (actually a step function)
-cdf_train = real_to_cdf(np.concatenate((y[0, 0], y[0, 1])))
+cdf_train = real_to_cdf(np.concatenate((y[0:1, 0], y[0:1, 1])))
 
 # CDF for predicted data
 cdf_pred_systole = real_to_cdf(pred_systole, loss_systole)
