@@ -8,10 +8,29 @@ import os.path
 from model import get_model
 from utils import crps, real_to_cdf, preprocess, rotation_augmentation, shift_augmentation, root_mean_squared_error
 import matplotlib.pyplot as plt
-from train import load_train_data
 import csv
 
+def load_train_data():
+    """
+    Load training data from .npy files.
+    """
+    X = np.load('/data/preprocessed/X_train.npy')
+    y = np.load('/data/preprocessed/y_train.npy')
+    metadata = np.load('/data/preprocessed/metadata_train.npy')
 
+    X = X[:, :30*15, :, :]
+    X = X.astype(np.float32)
+    X /= 255
+
+    seed = 12345
+    np.random.seed(seed)
+    np.random.shuffle(X)
+    np.random.seed(seed)
+    np.random.shuffle(y)
+    np.random.seed(seed)
+    np.random.shuffle(metadata)
+
+    return X, y, metadata
 # txt_file = r'/data/run2/loss.txt'
 # csv_file = r"mycsv.csv"
 
@@ -83,7 +102,7 @@ plt.xlabel('Volume')
 plt.ylabel('Probability')
 plt.title('Systole CDF vs Ground Truth (CRPS: ' + str(crps_train) + ")")
 plt.legend(['Ground Truth CDF', 'Predicted Systole CDF'])
-plt.savefig('systole.png')
+plt.savefig('systole.png', format='png')
 
 #plt.figure()
 plt.plot(cdf_train[1], 'g-')
@@ -93,4 +112,4 @@ plt.ylabel('Probability')
 plt.title('Diastole CDF vs Ground Truth (CRPS: ' + str(crps_train) + ")")
 plt.legend(['Ground Truth CDF', 'Predicted Diastole CDF'])
 plt.show()
-plt.savefig('diastole.png')
+plt.savefig('diastole.png', format='png')
