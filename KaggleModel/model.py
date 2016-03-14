@@ -57,6 +57,6 @@ def get_model():
     graph.add_node(Activation('relu'), name='relu4', input='dense1')
     graph.add_node(Dense(1, W_regularizer=l2(5e-1)), name='output', input='relu4', create_output=True)
 
-    adam = Adam(lr=0.001)
+    adam = Adam(lr=0.0001)
     graph.compile(optimizer=adam, loss={'output':root_mean_squared_error})
     return graph
