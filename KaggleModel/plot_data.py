@@ -82,7 +82,7 @@ X, y, metadata = load_train_data()
 
 print(metadata[0, :].shape, metadata[0].shape, metadata[0:1, :].shape)
 pred_systole = model_systole.predict({'input1':X[0:1, :, : , :], 'input2':metadata[0:1, :], 'output':y[0:1, 0]})['output']
-pred_diastole = model_diastole.predict({'input1':X[0], 'input2':metadata[0:1, :], 'output':y[0, 1]})['output']
+pred_diastole = model_diastole.predict({'input1':X[0:1,:,:,;], 'input2':metadata[0:1, :], 'output':y[0:1, 1]})['output']
 
 # CDF for train and test data (actually a step function)
 cdf_train = real_to_cdf(np.concatenate((y[0, 0], y[0, 1])))
