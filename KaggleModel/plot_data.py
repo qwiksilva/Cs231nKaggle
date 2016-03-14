@@ -122,5 +122,3 @@ plt.title('Diastole CDF vs Ground Truth (CRPS: ' + str(crps_train) + ")")
 plt.legend(['Ground Truth CDF', 'Predicted Diastole CDF'])
 plt.show()
 plt.savefig('diastole.png', format='png')
-
-print crps_train
