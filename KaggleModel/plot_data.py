@@ -80,8 +80,9 @@ if os.path.isfile('/data/run2/weights_diastole_best.hdf5'):
 print('Loading training data...')
 X, y, metadata = load_train_data()
 
-pred_systole = model_systole.predict({'input1':X[0], 'input2':metadata[0], 'output':y[0, 0]})['output']
-pred_diastole = model_diastole.predict({'input1':X[0], 'input2':metadata[0], 'output':y[0, 1]})['output']
+print(metadata[0, :].shape, metadata[0].shape)
+pred_systole = model_systole.predict({'input1':X[0], 'input2':metadata[0, :], 'output':y[0, 0]})['output']
+pred_diastole = model_diastole.predict({'input1':X[0], 'input2':metadata[0, :], 'output':y[0, 1]})['output']
 
 # CDF for train and test data (actually a step function)
 cdf_train = real_to_cdf(np.concatenate((y[0, 0], y[0, 1])))
