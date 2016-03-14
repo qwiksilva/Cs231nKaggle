@@ -98,10 +98,11 @@ np.save('gt.npy', cdf_train)
 
 
 
+
 # print(cdf_pred_diastole)
 # # evaluate CRPS on training data
-# crps_train = crps(cdf_train, np.concatenate((cdf_pred_systole, cdf_pred_diastole)))
-# print('CRPS(train) = {0}'.format(crps_train))
+crps_train = crps(cdf_train, np.concatenate((cdf_pred_systole, cdf_pred_diastole)))
+print('CRPS(train) = {0}'.format(crps_train))
 
 # # CDF
 # #plt.figure()
